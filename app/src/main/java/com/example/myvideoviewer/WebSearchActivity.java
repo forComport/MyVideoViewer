@@ -1,4 +1,4 @@
-package com.example.myservice;
+package com.example.myvideoviewer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,9 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.LayoutInflater;

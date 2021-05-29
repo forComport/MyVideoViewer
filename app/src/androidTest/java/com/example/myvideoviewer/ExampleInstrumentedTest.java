@@ -1,4 +1,4 @@
-package com.example.myservice;
+package com.example.myvideoviewer;
 
 import android.content.Context;
 

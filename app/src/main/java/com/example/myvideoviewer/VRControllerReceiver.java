@@ -1,14 +1,13 @@
-package com.example.myservice;
+package com.example.myvideoviewer;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.util.Log;
+import android.view.View;
 
-import java.util.ArrayList;
 import java.util.Stack;
 
 public class VRControllerReceiver extends BroadcastReceiver {
@@ -124,6 +123,13 @@ public class VRControllerReceiver extends BroadcastReceiver {
                 Intent intent = new Intent(activity, VideoActivity.class);
                 intent.putExtra("filename", item.title);
                 activity.startActivity(intent);
+            } else if ("VideoActivity".equals(name)) {
+                VideoActivity ac = (VideoActivity) activity;
+                if (ac.playerMenu.getVisibility() == View.INVISIBLE) {
+                    ac.playerMenu.setVisibility(View.VISIBLE);
+                } else {
+                    ac.playerMenu.setVisibility(View.INVISIBLE);
+                }
             }
             Log.d(TAG, "Trigger");
         }
