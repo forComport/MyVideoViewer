@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/move_to_web"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="웹 검색"/>
+
+    <Button
+        android:id="@+id/move_to_library"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="영상 목록"/>
+
+    <Button
+        android:id="@+id/bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="VR 컨트롤러 연결"/>
+
+</LinearLayout>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MyService</string>
+    <string name="search_hint">search hint</string>
+</resources>
