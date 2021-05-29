@@ -137,7 +137,7 @@ public class LibraryActivity extends AppCompatActivity {
                 case DownloadManager.STATUS_RUNNING:
                 case DownloadManager.STATUS_PENDING:
                 case DownloadManager.STATUS_PAUSED:
-                    desc.setText("다운로드 대기중...");
+                    desc.setText("다운로드중...");
                     actionButton.setEnabled(false);
                     break;
                 case DownloadManager.STATUS_FAILED:

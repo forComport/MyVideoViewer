@@ -46,9 +46,10 @@ public class WebDownloadActivity extends AppCompatActivity {
                 Uri uri = Uri.parse(url);
                 DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                 DownloadManager.Request request = new DownloadManager.Request(uri);
-                request.setTitle(uri.getLastPathSegment());
+                String title = getIntent().getStringExtra("title");
+                request.setTitle(title);
                 request.setDescription("다운로드중...");
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
                 request.setDestinationInExternalFilesDir(WebDownloadActivity.this, Environment.DIRECTORY_DOWNLOADS,
                         uri.getLastPathSegment());
                 downloadManager.enqueue(request);

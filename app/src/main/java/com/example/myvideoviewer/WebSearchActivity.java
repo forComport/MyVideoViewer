@@ -116,6 +116,7 @@ public class WebSearchActivity extends AppCompatActivity {
                 if (!videoUrls.isEmpty()) {
                     Intent i = new Intent(getApplicationContext(), WebDownloadActivity.class);
                     i.putExtra("videoUrls", videoUrls);
+                    i.putExtra("title", mWebView.getTitle());
                     startActivity(i);
                 }
             }
