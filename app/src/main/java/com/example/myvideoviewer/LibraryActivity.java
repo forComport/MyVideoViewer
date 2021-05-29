@@ -9,8 +9,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 
 public class LibraryActivity extends AppCompatActivity {
 
+    final private static String TAG = "LibraryActivityTAG";
     LibraryListAdapter mAdapter;
     private DownloadManager mDownloadManager;
     private VRControllerReceiver receiver;
@@ -79,11 +82,13 @@ public class LibraryActivity extends AppCompatActivity {
             itemList.clear();
             int columnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID);
             int columnTitle = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE);
+            int columnLocalUri = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI);
             int columnStatus = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS);
             while (cursor.moveToNext()) {
                 LibraryItem item = new LibraryItem();
                 item.id = cursor.getLong(columnId);
                 item.title = cursor.getString(columnTitle);
+                item.localUri = cursor.getString(columnLocalUri);
                 item.status = cursor.getInt(columnStatus);
                 itemList.add(item);
             }
@@ -123,7 +128,7 @@ public class LibraryActivity extends AppCompatActivity {
             Button deleteButton = convertView.findViewById(R.id.item_delete);
 
             LibraryItem item = itemList.get(position);
-            File file = new File(activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),item.title);
+            File file = new File(Uri.parse(item.localUri).getPath());
             Glide.with(convertView)
                     .load(file)
                     .into(thumbnail);
@@ -152,7 +157,8 @@ public class LibraryActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(activity, VideoActivity.class);
-                    intent.putExtra("filename", item.title);
+                    intent.putExtra("title", item.title);
+                    intent.putExtra("localUri", item.localUri);
                     activity.startActivity(intent);
                 }
             });
@@ -187,6 +193,7 @@ public class LibraryActivity extends AppCompatActivity {
     public static class LibraryItem {
         long id;
         String title;
+        String localUri;
         int status;
     }
 }

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -199,8 +200,8 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         try {
             Intent intent = getIntent();
-            String filename = intent.getStringExtra("filename");
-            File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), filename);
+            String localUri = intent.getStringExtra("localUri");
+            File file = new File(Uri.parse(localUri).getPath());
             mediaPlayer.setDataSource(file.getPath());
             mediaPlayer.prepare();
             mediaPlayer.setOnVideoSizeChangedListener(this);

@@ -19,6 +19,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -53,6 +54,7 @@ public class WebDownloadActivity extends AppCompatActivity {
                 request.setDestinationInExternalFilesDir(WebDownloadActivity.this, Environment.DIRECTORY_DOWNLOADS,
                         uri.getLastPathSegment());
                 downloadManager.enqueue(request);
+                Toast.makeText(getApplicationContext(), "다운로드 시작", Toast.LENGTH_LONG).show();
             }
         });
 
