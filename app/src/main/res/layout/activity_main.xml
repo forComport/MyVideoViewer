@@ -24,5 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="VR 컨트롤러 연결"/>
-
+    <TextView
+        android:id="@+id/bluetooth_battery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

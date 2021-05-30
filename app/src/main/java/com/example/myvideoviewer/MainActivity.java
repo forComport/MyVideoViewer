@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Set;
@@ -48,8 +49,12 @@ public class MainActivity extends AppCompatActivity {
     private final static UUID SERVICE_UUID = UUID.fromString("4f63756c-7573-2054-6872-65656d6f7465");
     private final static UUID WRITE_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d282");
     private final static UUID NOTIFY_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d281");
+    private final static UUID NOTIFY_ENABLE_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    private static final UUID Battery_Service_UUID = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
+    private static final UUID Battery_Level_UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
 
     private Button bluetoothButton;
+    private TextView bluetoothBattery;
     private BluetoothGatt gatt;
     private boolean connecting = false;
     private BluetoothGattCharacteristic writeChar;
@@ -71,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(ACTION_GATT_DISCONNECTED);
         filter.addAction(ACTION_GATT_SERVICES_DISCOVERED);
         filter.addAction(ACTION_DATA_AVAILABLE);
+        filter.addAction(EXTRA_DATA);
         registerReceiver(receiver, filter);
     }
 
@@ -106,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        bluetoothBattery = findViewById(R.id.bluetooth_battery);
         bluetoothButton = findViewById(R.id.bluetooth);
         bluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,12 +156,9 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothGattService service = gatt.getService(SERVICE_UUID);
                 writeChar = service.getCharacteristic(WRITE_UUID);
                 BluetoothGattCharacteristic notifyChar = service.getCharacteristic(NOTIFY_UUID);
-
-                for(BluetoothGattDescriptor desc: notifyChar.getDescriptors()) {
-                    desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    // 00002902-0000-1000-8000-00805f9b34fb
-                    boolean success = gatt.writeDescriptor(desc);
-                }
+                BluetoothGattDescriptor desc = notifyChar.getDescriptor(NOTIFY_ENABLE_UUID);
+                desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                gatt.writeDescriptor(desc);
                 boolean r = gatt.setCharacteristicNotification(notifyChar, true);
                 Log.d(TAG, "setCharacteristicNotification " + r);
                 try{
@@ -162,6 +166,19 @@ public class MainActivity extends AppCompatActivity {
                     writeChar.setValue(new byte[]{0x01,0x00});
                     gatt.writeCharacteristic(writeChar);
                 } catch (Exception e) {}
+
+                try{
+                    Thread.sleep(500);
+                    BluetoothGattService batteryService = gatt.getService(Battery_Service_UUID);
+                    BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
+                    BluetoothGattDescriptor batterDesc = batteryLevel.getDescriptor(NOTIFY_ENABLE_UUID);
+                    batterDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    boolean batterySuccess = gatt.readCharacteristic(batteryLevel);
+                Log.d(TAG, "battery read - " + batterySuccess);
+                } catch (Exception e) {}
+            } else if (EXTRA_DATA.equals(action)) {
+                int battery = intent.getIntExtra("device_battery",0);
+                bluetoothBattery.setText("컨트롤러 배터리 : " + battery + "%");
             }
         }
     };
@@ -223,7 +240,11 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
 //                    super.onCharacteristicRead(gatt, characteristic, status);
-                    Log.d(TAG, "onCharacteristicRead");
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        broadcastUpdate(EXTRA_DATA, characteristic);
+                    } else {
+                        Log.d(TAG, "onCharacteristicRead - " + status);
+                    }
                 }
 
                 @Override
@@ -250,6 +271,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
+
+    private void broadcastUpdate(final String action, BluetoothGattCharacteristic characteristic) {
+        final Intent intent = new Intent(action);
+        intent.putExtra("device_battery", characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0));
         sendBroadcast(intent);
     }
 

@@ -121,7 +121,8 @@ public class VRControllerReceiver extends BroadcastReceiver {
                 LibraryActivity ac = ((LibraryActivity)activity);
                 LibraryActivity.LibraryItem item = (LibraryActivity.LibraryItem) ac.mAdapter.getItem(ac.cursor);
                 Intent intent = new Intent(activity, VideoActivity.class);
-                intent.putExtra("filename", item.title);
+                intent.putExtra("title", item.title);
+                intent.putExtra("localUri", item.localUri);
                 activity.startActivity(intent);
             } else if ("VideoActivity".equals(name)) {
                 VideoActivity ac = (VideoActivity) activity;
