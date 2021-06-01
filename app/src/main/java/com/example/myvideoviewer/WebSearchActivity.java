@@ -46,6 +46,7 @@ public class WebSearchActivity extends AppCompatActivity {
     private Menu optionMenu;
     private ProgressBar mProgressBar;
     private DbHelper mDb;
+    private String youtubeLink;
 
     private static final List<String> BLACKLIST = Arrays.asList(
             "bowerywill.com", "play-vids.com"
@@ -113,7 +114,13 @@ public class WebSearchActivity extends AppCompatActivity {
         mImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!videoUrls.isEmpty()) {
+                if (youtubeLink != null) {
+                    Intent intent = new Intent(getApplicationContext(), YoutubeService.class);
+                    intent.putExtra("youtubeLink", youtubeLink);
+                    intent.putExtra("title", mWebView.getTitle());
+                    startForegroundService(intent);
+                    Toast.makeText(getApplicationContext(), "다운로드 시작", Toast.LENGTH_LONG).show();
+                } else if (!videoUrls.isEmpty()) {
                     Intent i = new Intent(getApplicationContext(), WebDownloadActivity.class);
                     i.putExtra("videoUrls", videoUrls);
                     i.putExtra("title", mWebView.getTitle());
@@ -166,6 +173,16 @@ public class WebSearchActivity extends AppCompatActivity {
                 }
                 return null;
             }
+
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                super.onLoadResource(view, url);
+                if (url.startsWith("https://m.youtube.com/watch?v=")) {
+                    youtubeLink = url;
+                    mImageButton.setBackground(getDrawable(R.drawable.circle_button_active));
+                    Log.d(TAG, "onLoadResource " + url);
+                }
+            }
         });
 
         mWebView.setWebChromeClient(new WebChromeClient() {
@@ -187,6 +204,7 @@ public class WebSearchActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if(mWebView.canGoBack()) {
+            youtubeLink = null;
             mWebView.goBack();
         } else {
             super.onBackPressed();

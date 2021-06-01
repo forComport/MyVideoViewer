@@ -18,7 +18,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyService"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:extractNativeLibs="true"
+        android:requestLegacyExternalStorage="true">
+        <service android:name=".YoutubeService"/>
         <activity android:name="com.example.myvideoviewer.VideoActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen"/>
         <activity android:name="com.example.myvideoviewer.LibraryActivity" />

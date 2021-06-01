@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,6 +88,7 @@ public class LibraryActivity extends AppCompatActivity {
                 item.id = cursor.getLong(columnId);
                 item.title = cursor.getString(columnTitle);
                 item.localUri = cursor.getString(columnLocalUri);
+                Log.d(TAG, item.localUri+"");
                 item.status = cursor.getInt(columnStatus);
                 itemList.add(item);
             }
@@ -128,10 +128,12 @@ public class LibraryActivity extends AppCompatActivity {
             Button deleteButton = convertView.findViewById(R.id.item_delete);
 
             LibraryItem item = itemList.get(position);
-            File file = new File(Uri.parse(item.localUri).getPath());
-            Glide.with(convertView)
-                    .load(file)
-                    .into(thumbnail);
+            if (item.localUri != null) {
+                File file = new File(Uri.parse(item.localUri).getPath());
+                Glide.with(convertView)
+                        .load(file)
+                        .into(thumbnail);
+            }
             title.setText(item.title);
             actionButton.setText("시청");
             switch (item.status){
