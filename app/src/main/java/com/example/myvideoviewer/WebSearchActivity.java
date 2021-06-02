@@ -2,16 +2,21 @@ package com.example.myvideoviewer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.app.DownloadManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.database.MatrixCursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,10 +29,14 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Adapter;
 import android.widget.CursorAdapter;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
@@ -47,6 +56,7 @@ public class WebSearchActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private DbHelper mDb;
     private String youtubeLink;
+    private DrawerLayout drawer;
 
     private static final List<String> BLACKLIST = Arrays.asList(
             "bowerywill.com", "play-vids.com"
@@ -110,7 +120,15 @@ public class WebSearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_web_search);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mProgressBar = findViewById(R.id.progress);
+        drawer = findViewById(R.id.drawer);
         mImageButton = findViewById(R.id.download_button);
+        findViewById(R.id.list_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadListView();
+                drawer.openDrawer(GravityCompat.START);
+            }
+        });
         mImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -193,6 +211,17 @@ public class WebSearchActivity extends AppCompatActivity {
             }
         });
         mWebView.loadUrl("https://naver.com");
+    }
+
+    private void loadListView() {
+        DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        Cursor cursor = dm.query(new DownloadManager.Query());
+        String[] strs = new String[]{DownloadManager.COLUMN_TITLE};
+        int[] ints = new int[] {android.R.id.text1};
+        ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.list_item_1,
+                cursor, strs,ints,0);
+        ListView listView = findViewById(R.id.drawer_list);
+        listView.setAdapter(adapter);
     }
 
     @Override
