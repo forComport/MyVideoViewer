@@ -10,13 +10,12 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.database.MatrixCursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,14 +28,13 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
-import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
@@ -57,6 +55,8 @@ public class WebSearchActivity extends AppCompatActivity {
     private DbHelper mDb;
     private String youtubeLink;
     private DrawerLayout drawer;
+    private View prevView;
+    private String selectedBlacklistUrl;
 
     private static final List<String> BLACKLIST = Arrays.asList(
             "bowerywill.com", "play-vids.com"
@@ -122,28 +122,38 @@ public class WebSearchActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.progress);
         drawer = findViewById(R.id.drawer);
         mImageButton = findViewById(R.id.download_button);
-        findViewById(R.id.list_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadListView();
-                drawer.openDrawer(GravityCompat.START);
+        findViewById(R.id.list_button).setOnClickListener((v)-> {
+            loadVideoListView();
+            findViewById(R.id.drawer_menu).setVisibility(View.INVISIBLE);
+            drawer.openDrawer(GravityCompat.START);
+        });
+        findViewById(R.id.drawer_add).setOnClickListener((v)-> {
+            mDb.insertBlacklist(Uri.parse(mWebView.getUrl()).getHost());
+            loadBlackListView();
+        });
+        findViewById(R.id.drawer_delete).setOnClickListener((v)->{
+            if(selectedBlacklistUrl != null){
+                mDb.deleteBlacklist(selectedBlacklistUrl);
+                loadBlackListView();
             }
         });
-        mImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (youtubeLink != null) {
-                    Intent intent = new Intent(getApplicationContext(), YoutubeService.class);
-                    intent.putExtra("youtubeLink", youtubeLink);
-                    intent.putExtra("title", mWebView.getTitle());
-                    startForegroundService(intent);
-                    Toast.makeText(getApplicationContext(), "다운로드 시작", Toast.LENGTH_LONG).show();
-                } else if (!videoUrls.isEmpty()) {
-                    Intent i = new Intent(getApplicationContext(), WebDownloadActivity.class);
-                    i.putExtra("videoUrls", videoUrls);
-                    i.putExtra("title", mWebView.getTitle());
-                    startActivity(i);
-                }
+        findViewById(R.id.list_blacklist).setOnClickListener((v)-> {
+            loadBlackListView();
+            findViewById(R.id.drawer_menu).setVisibility(View.VISIBLE);
+            drawer.openDrawer(GravityCompat.START);
+        });
+        mImageButton.setOnClickListener((v)-> {
+            if (youtubeLink != null) {
+                Intent intent = new Intent(getApplicationContext(), YoutubeService.class);
+                intent.putExtra("youtubeLink", youtubeLink);
+                intent.putExtra("title", mWebView.getTitle());
+                startForegroundService(intent);
+                Toast.makeText(getApplicationContext(), "다운로드 시작", Toast.LENGTH_LONG).show();
+            } else if (!videoUrls.isEmpty()) {
+                Intent i = new Intent(getApplicationContext(), WebDownloadActivity.class);
+                i.putExtra("videoUrls", videoUrls);
+                i.putExtra("title", mWebView.getTitle());
+                startActivity(i);
             }
         });
         mWebView = findViewById(R.id.webview);
@@ -172,7 +182,7 @@ public class WebSearchActivity extends AppCompatActivity {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                if(BLACKLIST.contains(request.getUrl().getHost())) {
+                if(mDb.hasBlacklist(request.getUrl().getHost())) {
                     return true;
                 }
                 Log.d(TAG, "shouldOverrideUrlLoading : " + request.getUrl().getHost());
@@ -213,13 +223,33 @@ public class WebSearchActivity extends AppCompatActivity {
         mWebView.loadUrl("https://naver.com");
     }
 
-    private void loadListView() {
-        DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        Cursor cursor = dm.query(new DownloadManager.Query());
-        String[] strs = new String[]{DownloadManager.COLUMN_TITLE};
+    private void loadBlackListView() {
+        selectedBlacklistUrl = null;
+        Cursor cursor = mDb.readBlacklist();
+        String [] columns = new String[]{DbHelper.BlacklistTable.COLUMN_URL};
         int[] ints = new int[] {android.R.id.text1};
         ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.list_item_1,
-                cursor, strs,ints,0);
+                cursor, columns, ints, 0);
+        ListView listView = findViewById(R.id.drawer_list);
+        listView.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id)-> {
+            Cursor c = (Cursor) adapter.getItem(position);
+            selectedBlacklistUrl = c.getString(c.getColumnIndex(DbHelper.BlacklistTable.COLUMN_URL));
+            if (prevView != null) {
+                prevView.setBackground(getDrawable(R.color.white));
+            }
+            view.setBackground(getDrawable(R.color.design_default_color_secondary));
+            prevView = view;
+        });
+        listView.setAdapter(adapter);
+    }
+
+    private void loadVideoListView() {
+        DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        Cursor cursor = dm.query(new DownloadManager.Query());
+        String[] columns = new String[]{DownloadManager.COLUMN_TITLE};
+        int[] ints = new int[] {android.R.id.text1};
+        ListAdapter adapter = new SimpleCursorAdapter(this, R.layout.list_item_1,
+                cursor, columns,ints,0);
         ListView listView = findViewById(R.id.drawer_list);
         listView.setAdapter(adapter);
     }
