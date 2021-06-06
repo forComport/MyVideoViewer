@@ -11,8 +11,8 @@
  
 - DPI 우회
 - 모자이크 제거 인코딩
-- 유튜브 영상 다운로드
-- 영상 링크 획득 로직 추가
+- 유튜브 영상 다운로드(with credential)
+- ts 분할 영상 다운로드
 
 # Gear VR Contoller 사용법
 
