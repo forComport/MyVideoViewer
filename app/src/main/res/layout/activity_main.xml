@@ -18,7 +18,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="영상 목록"/>
-
+    <Button
+        android:id="@+id/jav247"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="JAV 247"/>
     <Button
         android:id="@+id/bluetooth"
         android:layout_width="match_parent"

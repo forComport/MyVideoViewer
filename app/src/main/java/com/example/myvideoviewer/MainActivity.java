@@ -26,6 +26,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myvideoviewer.jav247.Jav247ListActivity;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -111,6 +113,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), LibraryActivity.class);
                 startActivity(intent);
             }
+        });
+        findViewById(R.id.jav247).setOnClickListener((v)->{
+            Intent intent = new Intent(getApplicationContext(), Jav247ListActivity.class);
+            startActivity(intent);
         });
         bluetoothBattery = findViewById(R.id.bluetooth_battery);
         bluetoothButton = findViewById(R.id.bluetooth);

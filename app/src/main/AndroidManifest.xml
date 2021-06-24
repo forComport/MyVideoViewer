@@ -21,6 +21,12 @@
         android:usesCleartextTraffic="true"
         android:extractNativeLibs="true"
         android:requestLegacyExternalStorage="true">
+        <receiver android:name=".jav247.DownloadReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
+            </intent-filter>
+        </receiver>
+        <activity android:name=".jav247.Jav247ListActivity"/>
         <service android:name=".YoutubeService"/>
         <activity android:name="com.example.myvideoviewer.VideoActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen"/>
