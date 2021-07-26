@@ -2,12 +2,16 @@ package com.example.myvideoviewer.jav247;
 
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,8 +28,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -40,6 +46,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -111,6 +120,7 @@ public class Jav247ListActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://jav247.net/page/"+page;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, (res)-> {
+            Log.d(TAG, url);
             Document doc = Jsoup.parse(res);
             Elements elements = doc.select("article");
             boolean skipNext = false;
@@ -206,6 +216,15 @@ public class Jav247ListActivity extends AppCompatActivity {
             ImageView thumbnailView = convertView.findViewById(R.id.thumbnail);
             TextView createdView = convertView.findViewById(R.id.created);
             Button stateView = convertView.findViewById(R.id.state);
+            Button linkView = convertView.findViewById(R.id.link);
+            linkView.setOnClickListener((v)-> {
+                findVideo(item.page_url, (url)->{
+                    Toast.makeText(context, url, Toast.LENGTH_SHORT).show();
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("label", url);
+                    clipboard.setPrimaryClip(clip);
+                });
+            });
             titleView.setText(item.title);
             Glide.with(convertView)
                     .load(item.thumbnail)
@@ -214,15 +233,14 @@ public class Jav247ListActivity extends AppCompatActivity {
             stateView.setText(item.state);
             stateView.setOnClickListener((v)->{
                 if("신규".equals(item.state)) {
-                    dbHelper.update(item.id, "다운중");
-                    item.state = "다운중";
-                    notifyDataSetChanged();
                     findVideo(item.page_url, (url)->{
+                        dbHelper.update(item.id, "다운중");
+                        item.state = "다운중";
+                        notifyDataSetChanged();
                         download(url, item.title);
                     });
                 } else if ("삭제".equals(item.state)) {
                     dialog(item, "숨김");
-                    removeVideo(item);
                 }
             });
             convertView.setOnClickListener((v)->{
@@ -280,6 +298,9 @@ public class Jav247ListActivity extends AppCompatActivity {
             dialog.setMessage(state + " 상태로 변경하시겠습니까?")
                     .setTitle("상태변경")
                     .setPositiveButton("예",(d, which)->{
+                        if ("숨김".equals(state)) {
+                            removeVideo(item);
+                        }
                         dbHelper.update(item.id, state);
                         item.state = state;
                         notifyDataSetChanged();
@@ -330,7 +351,49 @@ public class Jav247ListActivity extends AppCompatActivity {
                             }
                         });
                         if (jsonValues.size() > 0) {
-                            listener.callback(jsonValues.get(0).getString("file"));
+                            String redirect_url = jsonValues.get(0).getString("file");
+                            Log.d(TAG, redirect_url);
+                            new AsyncTask<Void, Void, String>() {
+                                protected String doInBackground(Void... voids) {
+                                    try {
+                                        URL url = new URL(redirect_url);
+                                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                                        conn.setRequestMethod("GET");
+                                        conn.connect();
+                                        int status = conn.getResponseCode();
+
+                                        Log.d(TAG, "status - " + status);
+                                        Log.d(TAG, "url - " + conn.getURL().toString());
+                                        for(String key : conn.getHeaderFields().keySet()) {
+                                            Log.d(TAG, "key - " + key + " : " + conn.getHeaderField(key));
+                                        }
+                                        conn.disconnect();
+                                        if (status == 200) {
+                                            return conn.getURL().toString();
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, e.toString());
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(String url) {
+                                    if (url != null) {
+                                        listener.callback(url);
+                                    } else {
+                                        Toast.makeText(context, "링크 획득 실패", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }.execute();
+//                            StringRequest stringRequest2 = new StringRequest(Request.Method.GET, redirect_url, (res2)->{
+//                                Log.d(TAG, res2);
+//                            }, (err)-> {
+//                                Log.d(TAG, err.toString());
+//                                Toast.makeText(context, err.toString(), Toast.LENGTH_SHORT).show();
+//                            });
+//                            queue.add(stringRequest2);
+//                            listener.callback(jsonValues.get(0).getString("file"));
                         }
                     } catch (JSONException ex) {
                         Toast.makeText(context, ex.toString(), Toast.LENGTH_SHORT).show();

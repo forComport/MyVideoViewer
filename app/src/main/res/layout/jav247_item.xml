@@ -28,12 +28,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"/>
-            <Button
-                android:id="@+id/state"
-                android:layout_width="wrap_content"
+            <LinearLayout
                 android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:orientation="horizontal"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"/>
+                android:layout_alignParentEnd="true">
+                <Button
+                    android:id="@+id/state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="링크"/>
+            </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

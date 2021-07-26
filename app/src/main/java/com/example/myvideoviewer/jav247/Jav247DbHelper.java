@@ -76,7 +76,7 @@ public class Jav247DbHelper extends SQLiteOpenHelper {
                 new String[]{"숨김"},
                 null,
                 null,
-                null
+                Jav247Table._ID + " DESC"
         );
     }
 
