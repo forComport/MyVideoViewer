@@ -57,7 +57,7 @@ public class Jav247DbHelper extends SQLiteOpenHelper {
         writableDb.insert(Jav247Table.TABLE_NAME, null, values);
     }
 
-    public Cursor read(){
+    public Cursor read(boolean reverse){
         if (readableDb == null) {
             readableDb = getReadableDatabase();
         }
@@ -76,7 +76,7 @@ public class Jav247DbHelper extends SQLiteOpenHelper {
                 new String[]{"숨김"},
                 null,
                 null,
-                Jav247Table._ID + " DESC"
+                reverse ? Jav247Table._ID + " DESC" : null
         );
     }
 
@@ -97,4 +97,5 @@ public class Jav247DbHelper extends SQLiteOpenHelper {
         values.put("state", state);
         writableDb.update(Jav247Table.TABLE_NAME, values, Jav247Table.TITLE+ "=?", new String[]{title});
     }
+
 }

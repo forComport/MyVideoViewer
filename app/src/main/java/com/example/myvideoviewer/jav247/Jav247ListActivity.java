@@ -89,12 +89,12 @@ public class Jav247ListActivity extends AppCompatActivity {
         setContentView(R.layout.acitivty_jav247);
         dbHelper = new Jav247DbHelper(this);
         ListView listView = findViewById(R.id.jav247_list);
-        adapter = new CustomAdapter(this, dbHelper.read(), dbHelper);
+        adapter = new CustomAdapter(this, dbHelper.read(true), dbHelper);
         listView.setAdapter(adapter);
     }
 
     private void syncDb() {
-        Cursor c = dbHelper.read();
+        Cursor c = dbHelper.read(false);
         String lastTitle = "";
         if (c.getCount() != 0) {
             c.moveToLast();
@@ -104,6 +104,7 @@ public class Jav247ListActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://jav247.net";
         String finalLastTitle = lastTitle;
+        Log.d(TAG, "sync until " + finalLastTitle);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, (res)->{
             Document doc = Jsoup.parse(res);
             Elements elements = doc.select("a.page-link");
@@ -155,7 +156,7 @@ public class Jav247ListActivity extends AppCompatActivity {
         javItems.clear();
         syncing = false;
         Toast.makeText(this, "동기화 완료", Toast.LENGTH_LONG).show();
-        adapter.loadList(dbHelper.read());
+        adapter.loadList(dbHelper.read(true));
         adapter.notifyDataSetChanged();
     }
 
@@ -170,6 +171,7 @@ public class Jav247ListActivity extends AppCompatActivity {
         }
 
         public void loadList(Cursor cursor) {
+            Log.d(TAG, cursor.getCount() + "");
             itemList.clear();
             int idColumn = cursor.getColumnIndexOrThrow(Jav247DbHelper.Jav247Table._ID);
             int titleColumn = cursor.getColumnIndexOrThrow(Jav247DbHelper.Jav247Table.TITLE);
