@@ -28,10 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -46,7 +44,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -324,6 +321,11 @@ public class Jav247ListActivity extends AppCompatActivity {
             request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS,
                     uri.getLastPathSegment());
             downloadManager.enqueue(request);
+
+            Log.d(TAG, "download");
+            Intent i = new Intent(context, ZombiService.class);
+            i.setPackage(context.getPackageName());
+            context.startForegroundService(i);
         }
 
         public void findVideo(String pageUrl, Listener listener) {
