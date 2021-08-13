@@ -160,6 +160,9 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
                 }
             }
         });
+        findViewById(R.id.btn_connect).setOnClickListener((v)->{
+            MainActivity.activity.searchDevice();
+        });
     }
 
     private void updateProgressBar() {

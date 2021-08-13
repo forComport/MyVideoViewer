@@ -32,7 +32,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".jav247.Jav247ListActivity" />
+        <activity android:name=".jav247.Jav247ListActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".YoutubeService" />
 

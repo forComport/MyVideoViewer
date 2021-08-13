@@ -34,6 +34,7 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivityTAG";
+    public static MainActivity activity = null;
 
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(ACTION_DATA_AVAILABLE);
         filter.addAction(EXTRA_DATA);
         registerReceiver(receiver, filter);
+        activity = this;
     }
 
     private void checkAndRequestPermission() {
@@ -202,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void searchDevice() {
+    public void searchDevice() {
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {

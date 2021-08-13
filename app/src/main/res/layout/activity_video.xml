@@ -58,6 +58,12 @@
                 android:src="@drawable/ic_rotate"
                 android:layout_width="48dp"
                 android:layout_height="48dp"/>
+            <ImageButton
+                android:id="@+id/btn_connect"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_connect"
+                android:layout_width="48dp"
+                android:layout_height="48dp"/>
         </LinearLayout>
     </LinearLayout>
 
