@@ -8,8 +8,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -21,10 +21,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyService"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".contents.DetailActivity"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen" />
+        <activity android:name=".contents.ListActivity" />
+
         <service
             android:name=".jav247.ZombiService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <receiver android:name=".jav247.DownloadReceiver">
             <intent-filter>
@@ -32,8 +38,9 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".jav247.Jav247ListActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".jav247.Jav247ListActivity"
+            android:screenOrientation="portrait" />
 
         <service android:name=".YoutubeService" />
 

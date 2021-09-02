@@ -83,7 +83,7 @@ public class Jav247ListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.acitivty_jav247);
+        setContentView(R.layout.activity_jav247);
         dbHelper = new Jav247DbHelper(this);
         ListView listView = findViewById(R.id.jav247_list);
         adapter = new CustomAdapter(this, dbHelper.read(true), dbHelper);
@@ -210,47 +210,47 @@ public class Jav247ListActivity extends AppCompatActivity {
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.jav247_item, parent, false);
             }
-            JavItem item = getItem(position);
-            TextView titleView = convertView.findViewById(R.id.title);
-            ImageView thumbnailView = convertView.findViewById(R.id.thumbnail);
-            TextView createdView = convertView.findViewById(R.id.created);
-            Button stateView = convertView.findViewById(R.id.state);
-            Button linkView = convertView.findViewById(R.id.link);
-            linkView.setOnClickListener((v)-> {
-                findVideo(item.page_url, (url)->{
-                    Toast.makeText(context, url, Toast.LENGTH_SHORT).show();
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("label", url);
-                    clipboard.setPrimaryClip(clip);
-                });
-            });
-            titleView.setText(item.title);
-            Glide.with(convertView)
-                    .load(item.thumbnail)
-                    .into(thumbnailView);
-            createdView.setText(item.created);
-            stateView.setText(item.state);
-            stateView.setOnClickListener((v)->{
-                if("신규".equals(item.state)) {
-                    findVideo(item.page_url, (url)->{
-                        dbHelper.update(item.id, "다운중");
-                        item.state = "다운중";
-                        notifyDataSetChanged();
-                        download(url, item.title);
-                    });
-                } else if ("삭제".equals(item.state)) {
-                    dialog(item, "숨김");
-                }
-            });
-            convertView.setOnClickListener((v)->{
-                if ("삭제".equals(item.state)) {
-                    watchVideo(item);
-                } else if("신규".equals(item.state)) {
-                    dialog(item, "숨김");
-                } else {
-                    dialog(item, "신규");
-                }
-            });
+//            JavItem item = getItem(position);
+//            TextView titleView = convertView.findViewById(R.id.title);
+//            ImageView thumbnailView = convertView.findViewById(R.id.thumbnail);
+//            TextView createdView = convertView.findViewById(R.id.created);
+//            Button stateView = convertView.findViewById(R.id.state);
+//            Button linkView = convertView.findViewById(R.id.link);
+//            linkView.setOnClickListener((v)-> {
+//                findVideo(item.page_url, (url)->{
+//                    Toast.makeText(context, url, Toast.LENGTH_SHORT).show();
+//                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+//                    ClipData clip = ClipData.newPlainText("label", url);
+//                    clipboard.setPrimaryClip(clip);
+//                });
+//            });
+//            titleView.setText(item.title);
+//            Glide.with(convertView)
+//                    .load(item.thumbnail)
+//                    .into(thumbnailView);
+//            createdView.setText(item.created);
+//            stateView.setText(item.state);
+//            stateView.setOnClickListener((v)->{
+//                if("신규".equals(item.state)) {
+//                    findVideo(item.page_url, (url)->{
+//                        dbHelper.update(item.id, "다운중");
+//                        item.state = "다운중";
+//                        notifyDataSetChanged();
+//                        download(url, item.title);
+//                    });
+//                } else if ("삭제".equals(item.state)) {
+//                    dialog(item, "숨김");
+//                }
+//            });
+//            convertView.setOnClickListener((v)->{
+//                if ("삭제".equals(item.state)) {
+//                    watchVideo(item);
+//                } else if("신규".equals(item.state)) {
+//                    dialog(item, "숨김");
+//                } else {
+//                    dialog(item, "신규");
+//                }
+//            });
             return convertView;
         }
 

@@ -7,29 +7,9 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/move_to_web"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="웹 검색"/>
-
-    <Button
-        android:id="@+id/move_to_library"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="영상 목록"/>
-    <Button
-        android:id="@+id/jav247"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="JAV 247"/>
-    <Button
-        android:id="@+id/bluetooth"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="VR 컨트롤러 연결"/>
-    <TextView
-        android:id="@+id/bluetooth_battery"
+    <LinearLayout
+        android:id="@+id/buttonGroup"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

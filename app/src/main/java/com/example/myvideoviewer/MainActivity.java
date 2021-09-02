@@ -23,9 +23,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myvideoviewer.contents.ContentsLoader;
+import com.example.myvideoviewer.contents.ListActivity;
+import com.example.myvideoviewer.provider.XVideoLoader;
 import com.example.myvideoviewer.jav247.Jav247ListActivity;
 
 import java.util.Set;
@@ -67,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkAndRequestPermission();
-        registerButtonEvent();
 
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -82,6 +85,18 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(EXTRA_DATA);
         registerReceiver(receiver, filter);
         activity = this;
+
+        LinearLayout group = findViewById(R.id.buttonGroup);
+        for(String key : ContentsLoader.Provider.keySet()) {
+            Button button = new Button(this);
+            button.setText(key);
+            button.setOnClickListener((v)->{
+                Intent intent = new Intent(getApplicationContext(), ListActivity.class);
+                intent.putExtra("provider", key);
+                startActivity(intent);
+            });
+            group.addView(button);
+        }
     }
 
     private void checkAndRequestPermission() {
@@ -99,40 +114,6 @@ public class MainActivity extends AppCompatActivity {
                     },
                     0);
         }
-    }
-
-    private void registerButtonEvent() {
-        findViewById(R.id.move_to_web).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), WebSearchActivity.class);
-                startActivity(intent);
-            }
-        });
-        findViewById(R.id.move_to_library).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), LibraryActivity.class);
-                startActivity(intent);
-            }
-        });
-        findViewById(R.id.jav247).setOnClickListener((v)->{
-            Intent intent = new Intent(getApplicationContext(), Jav247ListActivity.class);
-            startActivity(intent);
-        });
-        bluetoothBattery = findViewById(R.id.bluetooth_battery);
-        bluetoothButton = findViewById(R.id.bluetooth);
-        bluetoothButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mBluetoothAdapter.isEnabled()) {
-                    Intent intentBluetoothEnable = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(intentBluetoothEnable, BT_REQUEST_ENABLE);
-                } else {
-                    searchDevice();
-                }
-            }
-        });
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -172,8 +153,11 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     Thread.sleep(500);
                     writeChar.setValue(new byte[]{0x01,0x00});
-                    gatt.writeCharacteristic(writeChar);
-                } catch (Exception e) {}
+                    boolean success = gatt.writeCharacteristic(writeChar);
+                    Log.d(TAG, "battery read - " + success);
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                }
 
                 try{
                     Thread.sleep(500);
@@ -182,8 +166,10 @@ public class MainActivity extends AppCompatActivity {
                     BluetoothGattDescriptor batterDesc = batteryLevel.getDescriptor(NOTIFY_ENABLE_UUID);
                     batterDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                     boolean batterySuccess = gatt.readCharacteristic(batteryLevel);
-                Log.d(TAG, "battery read - " + batterySuccess);
-                } catch (Exception e) {}
+                    Log.d(TAG, "battery read - " + batterySuccess);
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                }
             } else if (EXTRA_DATA.equals(action)) {
                 int battery = intent.getIntExtra("device_battery",0);
                 bluetoothBattery.setText("컨트롤러 배터리 : " + battery + "%");
