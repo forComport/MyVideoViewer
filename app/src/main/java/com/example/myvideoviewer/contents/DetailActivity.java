@@ -15,6 +15,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.MediaController;
@@ -56,6 +57,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         videoView.setMediaController(mediaCtrl);
         videoView.setOnPreparedListener((v)->{
             videoView.start();
+            findViewById(R.id.progressBar).setVisibility(View.GONE);
         });
         String provider = getIntent().getStringExtra("provider");
         ContentsLoader loader = ContentsLoader.Provider.get(provider).setContext(this);
@@ -77,6 +79,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     @Override
     protected void onDestroy() {
         gatt.disconnect();
+        gatt.close();
         videoView.stopPlayback();
         super.onDestroy();
     }
@@ -99,16 +102,12 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
             if ("Gear VR Controller(E8B8)".equals(device.getName())) {
                 Log.d(TAG, "connectVrController");
-                gatt = device.connectGatt(this, false, new BluetoothGattCallback() {
+                gatt = device.connectGatt(this, true, new BluetoothGattCallback() {
 
                     @Override
                     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                         if (newState == BluetoothProfile.STATE_CONNECTED) {
                             gatt.discoverServices();
-                        } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                            runOnUiThread(()->{
-                                Toast.makeText(DetailActivity.this, "VR Ctrl 연결 실패", Toast.LENGTH_SHORT).show();
-                            });
                         }
                     }
 
