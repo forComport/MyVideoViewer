@@ -30,6 +30,8 @@ public abstract class ContentsLoader {
         return this;
     }
 
+    public abstract void init();
+
     public void setOnListener(Listener listener) {
         this.listener = listener;
     }

@@ -32,12 +32,13 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
             actionBar.setTitle(provider);
         }
         loader = ContentsLoader.Provider.get(provider).setContext(this);
+        loader.init();
         loader.setOnListener(this);
         ListView listView = findViewById(R.id.jav247_list);
         listView.setAdapter(adapter);
         listView.setOnScrollListener(this);
         adapter.setOnLinkListener(this);
-        loader.loadList();
+//        loader.loadList();
     }
 
     @Override

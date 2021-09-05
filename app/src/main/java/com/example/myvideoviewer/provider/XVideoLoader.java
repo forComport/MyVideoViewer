@@ -24,6 +24,14 @@ public class XVideoLoader extends ContentsLoader {
     private String url2 = "https://www.xvideos.com/new/";
 
     @Override
+    public void init() {
+        url = "https://www.xvideos.com/";
+        url2 = "https://www.xvideos.com/new/";
+        page = 0;
+        loading = false;
+    }
+
+    @Override
     public void search(String keyword) {
         page = 0;
         url = "https://www.xvideos.com/?k=" + keyword;

@@ -31,6 +31,15 @@ public class Jav247Loader extends ContentsLoader {
     private String url = "https://jav247.net/";
     private String url2 = "https://jav247.net/page/";
 
+
+    @Override
+    public void init() {
+        url = "https://jav247.net/";
+        url2 = "https://jav247.net/page/";
+        page = 0;
+        loading = false;
+    }
+
     @Override
     public void search(String keyword) {
     }
@@ -45,6 +54,7 @@ public class Jav247Loader extends ContentsLoader {
         }
 
         RequestQueue queue = Volley.newRequestQueue(context);
+        Log.d(TAG, url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, (res)-> {
             Document doc = Jsoup.parse(res);
             Elements elements = doc.select("section.videos-list > div > div");
