@@ -1,5 +1,6 @@
 package com.example.myvideoviewer.contents;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
@@ -12,14 +13,17 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -89,6 +93,38 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         vrCtrl.setListener(this);
 
         connectVrController();
+        registerButton();
+    }
+
+    private void registerButton() {
+        findViewById(R.id.btn_alarm).setOnClickListener((v)->{
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("자동 종료 알람");
+            final EditText edittext = new EditText(this);
+            builder.setView(edittext);
+            builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    try {
+                        int minute = Integer.parseInt(String.valueOf(edittext.getText()));
+                        final Handler handler = new Handler(Looper.getMainLooper());
+                        handler.postDelayed(()->{
+                            System.exit(0);
+                        }, minute * 60*1000);
+                        Toast.makeText(getApplicationContext(), minute+"분 후 종료", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
+                    }
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        });
     }
 
     @Override
