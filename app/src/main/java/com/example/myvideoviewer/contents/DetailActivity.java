@@ -12,6 +12,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.example.myvideoviewer.R;
+import com.example.myvideoviewer.provider.YoutubeLoader;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -46,23 +49,41 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
+//        View decorView = getWindow().getDecorView();
+//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+//        decorView.setSystemUiVisibility(uiOptions);
 
-        ContentsItem item = (ContentsItem) getIntent().getParcelableExtra("item");
         videoView = findViewById(R.id.video);
         mediaCtrl = new MediaController(this);
         videoView.setMediaController(mediaCtrl);
         videoView.setOnPreparedListener((v)->{
+            int width = videoView.getMeasuredWidth();
+            int height = videoView.getMeasuredHeight();
+            if (height > width) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
             videoView.start();
             findViewById(R.id.progressBar).setVisibility(View.GONE);
         });
-        String provider = getIntent().getStringExtra("provider");
-        ContentsLoader loader = ContentsLoader.Provider.get(provider).setContext(this);
+
+        Intent intent = getIntent();
+        String provider = intent.getStringExtra("provider");
+        ContentsItem item;
+        ContentsLoader loader;
+        if (provider == null) {
+            String url = intent.getStringExtra(Intent.EXTRA_TEXT);
+            YoutubeLoader youtubeLoader = new YoutubeLoader();
+            loader = youtubeLoader.setContext(this);
+            loader.init();
+            item = youtubeLoader.makeItem(url);
+        } else {
+            item = (ContentsItem) intent.getParcelableExtra("item");
+            loader = ContentsLoader.Provider.get(provider).setContext(this);
+        }
         loader.setOnListener(this);
         loader.loadDetail(item);
+
 
         vrCtrl = new VRController();
         vrCtrl.setListener(this);
@@ -73,7 +94,9 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     @Override
     protected void onPause() {
         super.onPause();
-        videoView.pause();
+        if (videoView != null) {
+            videoView.pause();
+        }
     }
 
     @Override
