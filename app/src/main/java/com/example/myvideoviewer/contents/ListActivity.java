@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -17,7 +18,7 @@ import com.example.myvideoviewer.R;
 import java.util.ArrayList;
 
 public class ListActivity extends AppCompatActivity implements AbsListView.OnScrollListener,
-        ContentsAdapter.Listener, ContentsLoader.Listener {
+        ContentsAdapter.Listener, ContentsLoader.ListListener {
     private static final String TAG = "ListActivityTAG";
     private ContentsLoader loader;
     private ContentsAdapter adapter = new ContentsAdapter();
@@ -33,7 +34,7 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
         }
         loader = ContentsLoader.Provider.get(provider).setContext(this);
         loader.init();
-        loader.setOnListener(this);
+        loader.setOnListListener(this);
         ListView listView = findViewById(R.id.jav247_list);
         listView.setAdapter(adapter);
         listView.setOnScrollListener(this);
@@ -80,6 +81,7 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         int lastItem = firstVisibleItem + visibleItemCount;
         if (lastItem == totalItemCount && !loader.loading) {
+            findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
             loader.loadList();
         }
     }
@@ -98,8 +100,6 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
             adapter.add(item);
         }
         adapter.notifyDataSetChanged();
+        findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
     }
-
-    @Override
-    public void onVideoLoad(String url) {}
 }

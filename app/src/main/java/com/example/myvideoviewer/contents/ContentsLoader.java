@@ -19,11 +19,15 @@ public abstract class ContentsLoader {
         put(XVideoLoader.KEY,new XVideoLoader());
         put(Jav247Loader.KEY, new Jav247Loader());
     }};
-    public interface Listener {
+    public interface ListListener {
         void onListLoad(ArrayList<ContentsItem> items);
+    }
+    public interface DetailListener {
         void onVideoLoad(String url);
     }
-    protected Listener listener;
+
+    protected ListListener listListener;
+    protected DetailListener detailListener;
 
     public ContentsLoader setContext(Context context) {
         this.context = context;
@@ -32,8 +36,11 @@ public abstract class ContentsLoader {
 
     public abstract void init();
 
-    public void setOnListener(Listener listener) {
-        this.listener = listener;
+    public void setOnListListener(ListListener listener) {
+        this.listListener = listener;
+    }
+    public void setOnDetailListener(DetailListener listener) {
+        this.detailListener = listener;
     }
 
     public abstract void search(String keyword);

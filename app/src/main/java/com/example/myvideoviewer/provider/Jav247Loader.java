@@ -42,6 +42,10 @@ public class Jav247Loader extends ContentsLoader {
 
     @Override
     public void search(String keyword) {
+        try {
+            page = Integer.parseInt(keyword);
+            loadList();
+        } catch (Exception e) {}
     }
 
     public void loadList() {
@@ -67,7 +71,7 @@ public class Jav247Loader extends ContentsLoader {
                 ContentsItem item = new ContentsItem(thumbnail, pageUrl, title, meta);
                 arr.add(item);
             }
-            listener.onListLoad(arr);
+            listListener.onListLoad(arr);
             page += 1;
             loading = false;
         }, (err)-> {
@@ -133,7 +137,7 @@ public class Jav247Loader extends ContentsLoader {
                             @Override
                             protected void onPostExecute(String url) {
                                 if (url != null) {
-                                    listener.onVideoLoad(url);
+                                    detailListener.onVideoLoad(url);
                                 } else {
                                     Toast.makeText(context, "링크 획득 실패", Toast.LENGTH_SHORT).show();
                                 }

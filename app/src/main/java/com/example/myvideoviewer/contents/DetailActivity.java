@@ -3,6 +3,7 @@ package com.example.myvideoviewer.contents;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -23,6 +24,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.MediaController;
 import android.widget.Toast;
@@ -34,7 +36,7 @@ import com.example.myvideoviewer.provider.YoutubeLoader;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class DetailActivity extends AppCompatActivity implements ContentsLoader.Listener, VRController.Listener {
+public class DetailActivity extends AppCompatActivity implements ContentsLoader.DetailListener, VRController.Listener {
     private static final String TAG = "DetailActivityTAG";
     private final static UUID SERVICE_UUID = UUID.fromString("4f63756c-7573-2054-6872-65656d6f7465");
     private final static UUID WRITE_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d282");
@@ -48,6 +50,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     private BluetoothGatt gatt;
     private VRController vrCtrl;
 
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +60,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
 //        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 //                | View.SYSTEM_UI_FLAG_FULLSCREEN;
 //        decorView.setSystemUiVisibility(uiOptions);
-
+        getWindow().setNavigationBarColor(R.color.black);
         videoView = findViewById(R.id.video);
         mediaCtrl = new MediaController(this);
         videoView.setMediaController(mediaCtrl);
@@ -85,7 +88,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             item = (ContentsItem) intent.getParcelableExtra("item");
             loader = ContentsLoader.Provider.get(provider).setContext(this);
         }
-        loader.setOnListener(this);
+        loader.setOnDetailListener(this);
         loader.loadDetail(item);
 
 
@@ -141,11 +144,6 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         gatt.close();
         videoView.stopPlayback();
         super.onDestroy();
-    }
-
-    @Override
-    public void onListLoad(ArrayList<ContentsItem> items) {
-
     }
 
     @Override

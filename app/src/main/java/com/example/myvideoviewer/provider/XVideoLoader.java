@@ -61,7 +61,7 @@ public class XVideoLoader extends ContentsLoader {
                 ContentsItem item = new ContentsItem(thumbnail, pageUrl, title, meta);
                 arr.add(item);
             }
-            listener.onListLoad(arr);
+            listListener.onListLoad(arr);
             page += 1;
             loading = false;
         }, (err)-> {
@@ -74,10 +74,10 @@ public class XVideoLoader extends ContentsLoader {
     public void loadDetail(ContentsItem item) {
         RequestQueue queue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, item.pageUrl, (res)-> {
-//            String video = res.split("html5player\\.setVideoUrlHigh\\('")[1].split("'\\);")[0];
-            String video = res.split("html5player\\.setVideoUrlLow\\('")[1].split("'\\);")[0];
-            if (listener != null) {
-                listener.onVideoLoad(video);
+            String video = res.split("html5player\\.setVideoUrlHigh\\('")[1].split("'\\);")[0];
+//            String video = res.split("html5player\\.setVideoUrlLow\\('")[1].split("'\\);")[0];
+            if (detailListener != null) {
+                detailListener.onVideoLoad(video);
             }
         }, (err)-> {
             Toast.makeText(context, err.toString(), Toast.LENGTH_LONG).show();

@@ -51,8 +51,8 @@ public class YoutubeLoader extends ContentsLoader {
             request.addOption("-f", "best");
             VideoInfo streamInfo = YoutubeDL.getInstance().getInfo(request);
             String url = streamInfo.getUrl();
-            if (listener != null) {
-                listener.onVideoLoad(url);
+            if (detailListener != null) {
+                detailListener.onVideoLoad(url);
             }
         } catch (YoutubeDLException | InterruptedException e) {
             Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
