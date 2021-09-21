@@ -26,6 +26,7 @@ public abstract class ContentsLoader {
     }
     public interface DetailListener {
         void onVideoLoad(String url);
+        void onRelativeListLoad(ArrayList<ContentsItem> items);
     }
 
     protected ListListener listListener;
@@ -50,5 +51,4 @@ public abstract class ContentsLoader {
     public abstract void loadList();
 
     public abstract void loadDetail(ContentsItem item);
-
 }

@@ -26,10 +26,16 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.bumptech.glide.Glide;
 import com.example.myvideoviewer.R;
 import com.example.myvideoviewer.provider.YoutubeLoader;
 
@@ -49,6 +55,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     private MediaController mediaCtrl;
     private BluetoothGatt gatt;
     private VRController vrCtrl;
+    private ArrayList<ContentsItem> RelativeVideos = new ArrayList<>();
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -91,7 +98,6 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         loader.setOnDetailListener(this);
         loader.loadDetail(item);
 
-
         vrCtrl = new VRController();
         vrCtrl.setListener(this);
 
@@ -105,26 +111,66 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             builder.setTitle("자동 종료 알람");
             final EditText edittext = new EditText(this);
             builder.setView(edittext);
-            builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    try {
-                        int minute = Integer.parseInt(String.valueOf(edittext.getText()));
-                        final Handler handler = new Handler(Looper.getMainLooper());
-                        handler.postDelayed(()->{
-                            System.exit(0);
-                        }, minute * 60*1000);
-                        Toast.makeText(getApplicationContext(), minute+"분 후 종료", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
-                    }
-                    dialog.dismiss();
+            builder.setPositiveButton("설정", (dialog, id)->{
+                try {
+                    int minute = Integer.parseInt(String.valueOf(edittext.getText()));
+                    final Handler handler = new Handler(Looper.getMainLooper());
+                    handler.postDelayed(()->{
+                        System.exit(0);
+                    }, minute * 60*1000);
+                    Toast.makeText(getApplicationContext(), minute+"분 후 종료", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
                 }
+                dialog.dismiss();
             });
             builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     dialog.dismiss();
                 }
             });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        });
+
+        findViewById(R.id.btn_series).setOnClickListener((v)->{
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("관련 영상 선택");
+            builder.setPositiveButton("닫기", (dialog, id)->{
+                dialog.dismiss();
+            });
+            HorizontalScrollView scrollView = new HorizontalScrollView(v.getContext());
+            LinearLayout layout = new LinearLayout(v.getContext());
+            for(ContentsItem item : RelativeVideos) {
+                LinearLayout itemLayout = new LinearLayout(v.getContext());
+                itemLayout.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(15,5,15,5);
+                itemLayout.setLayoutParams(layoutParams);
+
+                TextView textView = new TextView(v.getContext());
+                textView.setText(item.title);
+                textView.setTextSize(10);
+                ImageView imageView = new ImageView(v.getContext());
+                imageView.setMaxHeight(400);
+                imageView.setMinimumHeight(400);
+                Glide.with(v.getContext())
+                        .load(item.thumbnail)
+                        .into(imageView);
+                itemLayout.addView(imageView);
+                itemLayout.addView(textView);
+                layout.addView(itemLayout);
+                layout.setOnClickListener((vv)->{
+                    Intent intent = new Intent(this, DetailActivity.class);
+                    intent.putExtra("item", item);
+                    intent.putExtra("provider", getIntent().getStringExtra("provider"));
+                    startActivity(intent);
+                    finish();
+                });
+            }
+            scrollView.addView(layout);
+            builder.setView(scrollView);
             AlertDialog dialog = builder.create();
             dialog.show();
         });
@@ -279,5 +325,10 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
                 }
             }
         });
+    }
+
+    @Override
+    public void onRelativeListLoad(ArrayList<ContentsItem> items) {
+        RelativeVideos = items;
     }
 }

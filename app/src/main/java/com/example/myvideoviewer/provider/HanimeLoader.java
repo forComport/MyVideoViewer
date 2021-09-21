@@ -90,8 +90,8 @@ public class HanimeLoader extends ContentsLoader {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, item.pageUrl, (res)-> {
             try {
                 String videoUrl = null;
-                JSONArray servers = new JSONObject(res)
-                        .getJSONObject("videos_manifest")
+                JSONObject obj = new JSONObject(res);
+                JSONArray servers = obj.getJSONObject("videos_manifest")
                         .getJSONArray("servers");
                 for(int i=0;i<servers.length();i++) {
                     JSONObject server = servers.getJSONObject(i);
@@ -108,8 +108,21 @@ public class HanimeLoader extends ContentsLoader {
                         Log.d(TAG, stream.getString("filename"));
                     }
                 }
+
+                JSONArray series = obj.getJSONArray("hentai_franchise_hentai_videos");
+                ArrayList<ContentsItem> contents = new ArrayList<>();
+                for(int i=0;i<series.length();i++) {
+                    JSONObject _item = series.getJSONObject(i);
+                    String thumbnail = _item.getString("poster_url");
+                    String title = _item.getString("name");
+                    String pageUrl = "https://hw.hanime.tv/api/v8/video?id=" + _item.getString("slug");
+                    String meta = "";
+                    ContentsItem content = new ContentsItem(thumbnail, pageUrl, title, meta);
+                    contents.add(content);
+                }
                 if (detailListener != null) {
                     detailListener.onVideoLoad(videoUrl);
+                    detailListener.onRelativeListLoad(contents);
                 }
             }catch (Exception e) {
                 Log.d(TAG, e.toString());

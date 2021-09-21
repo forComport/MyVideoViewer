@@ -24,6 +24,12 @@
             android:src="@drawable/ic_alarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+        <ImageButton
+            android:id="@+id/btn_series"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
     <ProgressBar
         android:id="@+id/progressBar"

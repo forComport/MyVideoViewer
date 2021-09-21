@@ -10,6 +10,8 @@ import com.android.volley.toolbox.Volley;
 import com.example.myvideoviewer.contents.ContentsItem;
 import com.example.myvideoviewer.contents.ContentsLoader;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -75,9 +77,25 @@ public class XVideoLoader extends ContentsLoader {
         RequestQueue queue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, item.pageUrl, (res)-> {
             String video = res.split("html5player\\.setVideoUrlHigh\\('")[1].split("'\\);")[0];
-//            String video = res.split("html5player\\.setVideoUrlLow\\('")[1].split("'\\);")[0];
+            String raw = res.split("video_related=")[1].split(";window.wpn_categories")[0];
+            ArrayList<ContentsItem> arr = new ArrayList<>();
+            try {
+                JSONArray relative = new JSONArray(raw);
+                for(int i=0;i<relative.length();i++) {
+                    JSONObject obj = relative.getJSONObject(i);
+                    String thumbnail = obj.getString("i");
+                    String title = obj.getString("t");
+                    String pageUrl = "https://www.xvideos.com" + obj.getString("u");
+                    String meta = "";
+                    ContentsItem _item = new ContentsItem(thumbnail, pageUrl, title, meta);
+                    arr.add(_item);
+                }
+            } catch (Exception e) {
+                Log.d(TAG, e.toString());
+            }
             if (detailListener != null) {
                 detailListener.onVideoLoad(video);
+                detailListener.onRelativeListLoad(arr);
             }
         }, (err)-> {
             Toast.makeText(context, err.toString(), Toast.LENGTH_LONG).show();
