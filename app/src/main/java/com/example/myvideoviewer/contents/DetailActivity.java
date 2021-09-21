@@ -160,14 +160,14 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
                         .into(imageView);
                 itemLayout.addView(imageView);
                 itemLayout.addView(textView);
-                layout.addView(itemLayout);
-                layout.setOnClickListener((vv)->{
+                itemLayout.setOnClickListener((vv)->{
                     Intent intent = new Intent(this, DetailActivity.class);
                     intent.putExtra("item", item);
                     intent.putExtra("provider", getIntent().getStringExtra("provider"));
                     startActivity(intent);
                     finish();
                 });
+                layout.addView(itemLayout);
             }
             scrollView.addView(layout);
             builder.setView(scrollView);
