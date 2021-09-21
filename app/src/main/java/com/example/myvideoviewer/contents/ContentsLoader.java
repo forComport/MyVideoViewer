@@ -2,6 +2,7 @@ package com.example.myvideoviewer.contents;
 
 import android.content.Context;
 
+import com.example.myvideoviewer.provider.HanimeLoader;
 import com.example.myvideoviewer.provider.Jav247Loader;
 import com.example.myvideoviewer.provider.XVideoLoader;
 
@@ -18,6 +19,7 @@ public abstract class ContentsLoader {
     public static Map<String, ContentsLoader> Provider = new HashMap<String, ContentsLoader>() {{
         put(XVideoLoader.KEY,new XVideoLoader());
         put(Jav247Loader.KEY, new Jav247Loader());
+        put(HanimeLoader.KEY, new HanimeLoader());
     }};
     public interface ListListener {
         void onListLoad(ArrayList<ContentsItem> items);

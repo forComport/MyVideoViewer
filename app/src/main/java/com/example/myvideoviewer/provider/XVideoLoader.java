@@ -34,8 +34,8 @@ public class XVideoLoader extends ContentsLoader {
     @Override
     public void search(String keyword) {
         page = 0;
-        url = "https://www.xvideos.com/?k=" + keyword;
-        url2 = "https://www.xvideos.com/?k=" + keyword + "&p=";
+        url = "https://www.xvideos.com/?k=" + keyword.replace(" ", "+");
+        url2 = "https://www.xvideos.com/?k=" + keyword.replace(" ", "+") + "&p=";
         loadList();
     }
 
