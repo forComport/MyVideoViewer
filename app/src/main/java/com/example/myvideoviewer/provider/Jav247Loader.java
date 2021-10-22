@@ -10,7 +10,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.myvideoviewer.contents.ContentsItem;
 import com.example.myvideoviewer.contents.ContentsLoader;
-import com.example.myvideoviewer.jav247.Jav247ListActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

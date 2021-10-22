@@ -10,7 +10,7 @@ public class VRController {
     boolean prevTouchPadButton = false;
     boolean prevVolumeUpButton = false;
     boolean prevVolumeDownButton = false;
-    interface Listener {
+    public interface Listener {
         void onVolumeUp();
         void onVolumeDown();
         void onPadPress(int x, int y);

@@ -21,14 +21,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyService"
         android:usesCleartextTraffic="true">
+        <activity android:name=".WebViewActivity"></activity>
         <activity
             android:name=".contents.DetailActivity"
-
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen" >
+            android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
@@ -48,21 +50,6 @@
         <activity
             android:name=".jav247.Jav247ListActivity"
             android:screenOrientation="portrait" />
-
-        <service android:name=".YoutubeService" />
-
-        <activity
-            android:name=".VideoActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen" />
-        <activity android:name=".LibraryActivity" />
-        <activity
-            android:name=".WebDownloadActivity"
-            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
-        <activity android:name=".WebSearchActivity">
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
