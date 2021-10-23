@@ -44,16 +44,9 @@ import java.util.UUID;
 
 public class DetailActivity extends AppCompatActivity implements ContentsLoader.DetailListener, VRController.Listener {
     private static final String TAG = "DetailActivityTAG";
-    private final static UUID SERVICE_UUID = UUID.fromString("4f63756c-7573-2054-6872-65656d6f7465");
-    private final static UUID WRITE_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d282");
-    private final static UUID NOTIFY_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d281");
-    private final static UUID NOTIFY_ENABLE_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-    private static final UUID Battery_Service_UUID = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
-    private static final UUID Battery_Level_UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
 
     private VideoView videoView;
     private MediaController mediaCtrl;
-    private BluetoothGatt gatt;
     private VRController vrCtrl;
     private ArrayList<ContentsItem> RelativeVideos = new ArrayList<>();
 
@@ -98,10 +91,9 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         loader.setOnDetailListener(this);
         loader.loadDetail(item);
 
-        vrCtrl = new VRController();
+        vrCtrl = new VRController(this);
         vrCtrl.setListener(this);
 
-        connectVrController();
         registerButton();
     }
 
@@ -186,8 +178,6 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
 
     @Override
     protected void onDestroy() {
-        gatt.disconnect();
-        gatt.close();
         videoView.stopPlayback();
         super.onDestroy();
     }
@@ -197,74 +187,6 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         Log.d(TAG, url);
         videoView.setVideoURI(Uri.parse(url));
         videoView.requestFocus();
-    }
-
-    private void connectVrController() {
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
-        for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
-            if ("Gear VR Controller(E8B8)".equals(device.getName())) {
-                Log.d(TAG, "connectVrController");
-                gatt = device.connectGatt(this, true, new BluetoothGattCallback() {
-
-                    @Override
-                    public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                        if (newState == BluetoothProfile.STATE_CONNECTED) {
-                            gatt.discoverServices();
-                        }
-                    }
-
-                    @Override
-                    public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                        Log.d(TAG, "onServicesDiscovered");
-                        BluetoothGattService batteryService = gatt.getService(Battery_Service_UUID);
-                        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
-                        BluetoothGattDescriptor batterDesc = batteryLevel.getDescriptor(NOTIFY_ENABLE_UUID);
-                        batterDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        boolean batterySuccess = gatt.readCharacteristic(batteryLevel);
-                        Log.d(TAG, "battery read - " + batterySuccess);
-                    }
-
-                    @Override
-                    public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                        Log.d(TAG, "onCharacteristicRead");
-                        if (status == BluetoothGatt.GATT_SUCCESS) {
-                            int battery = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-                            runOnUiThread(()-> {
-                                Toast.makeText(DetailActivity.this, "VR Ctrl 배터리 " + battery + "%", Toast.LENGTH_SHORT).show();
-                            });
-
-                            BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                            BluetoothGattCharacteristic writeChar = service.getCharacteristic(WRITE_UUID);
-                            writeChar.setValue(new byte[]{0x01,0x00});
-                            boolean success = gatt.writeCharacteristic(writeChar);
-                            Log.d(TAG, "write - " + success);
-                        } else {
-                            Log.d(TAG, "onCharacteristicRead - " + status);
-                        }
-                    }
-
-                    @Override
-                    public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                        Log.d(TAG, "onCharacteristicWrite");
-                        gatt.executeReliableWrite();
-
-                        BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                        BluetoothGattCharacteristic notifyChar = service.getCharacteristic(NOTIFY_UUID);
-                        BluetoothGattDescriptor desc = notifyChar.getDescriptor(NOTIFY_ENABLE_UUID);
-                        desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        gatt.writeDescriptor(desc);
-                        boolean r = gatt.setCharacteristicNotification(notifyChar, true);
-                        Log.d(TAG, "setCharacteristicNotification " + r);
-                    }
-
-                    @Override
-                    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                        vrCtrl.receiveData(characteristic.getValue());
-                    }
-                });
-            }
-        }
     }
 
     @Override

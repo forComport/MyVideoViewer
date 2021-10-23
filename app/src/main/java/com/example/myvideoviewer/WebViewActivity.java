@@ -13,7 +13,10 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,14 +50,7 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
     private static final String TAG = "WebViewActivityTAG";
     private static final String BOOK_MARK = "BookMark";
     private static final String PREF_NAME = "WebViewActivity";
-    private final static UUID SERVICE_UUID = UUID.fromString("4f63756c-7573-2054-6872-65656d6f7465");
-    private final static UUID WRITE_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d282");
-    private final static UUID NOTIFY_UUID = UUID.fromString("c8c51726-81bc-483b-a052-f7a14ea3d281");
-    private final static UUID NOTIFY_ENABLE_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-    private static final UUID Battery_Service_UUID = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
-    private static final UUID Battery_Level_UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
 
-    private BluetoothGatt gatt;
     private VRController vrCtrl;
     private Menu optionMenu;
     private SearchView mSearchView;
@@ -125,6 +121,7 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 
+
         mWebView = findViewById(R.id.webView);
         mWebView.setWebChromeClient(new WebChromeClient());
         mWebView.setWebViewClient(new WebViewClient());
@@ -135,9 +132,8 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
 //        mWebView.loadUrl("https://google.co.kr");
         mWebView.loadUrl("https://blacktoon130.com");
 
-        vrCtrl = new VRController();
+        vrCtrl = new VRController(this);
         vrCtrl.setListener(this);
-        connectVrController();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -152,8 +148,7 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
 
     @Override
     protected void onDestroy() {
-        gatt.disconnect();
-        gatt.close();
+        vrCtrl.destroy();
         super.onDestroy();
     }
 
@@ -181,74 +176,6 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
         return arr;
     }
 
-    private void connectVrController() {
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
-        for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
-            if ("Gear VR Controller(E8B8)".equals(device.getName())) {
-                Log.d(TAG, "connectVrController");
-                gatt = device.connectGatt(this, true, new BluetoothGattCallback() {
-
-                    @Override
-                    public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                        if (newState == BluetoothProfile.STATE_CONNECTED) {
-                            gatt.discoverServices();
-                        }
-                    }
-
-                    @Override
-                    public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                        Log.d(TAG, "onServicesDiscovered");
-                        BluetoothGattService batteryService = gatt.getService(Battery_Service_UUID);
-                        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
-                        BluetoothGattDescriptor batterDesc = batteryLevel.getDescriptor(NOTIFY_ENABLE_UUID);
-                        batterDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        boolean batterySuccess = gatt.readCharacteristic(batteryLevel);
-                        Log.d(TAG, "battery read - " + batterySuccess);
-                    }
-
-                    @Override
-                    public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                        Log.d(TAG, "onCharacteristicRead");
-                        if (status == BluetoothGatt.GATT_SUCCESS) {
-                            int battery = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-                            runOnUiThread(()-> {
-                                Toast.makeText(WebViewActivity.this, "VR Ctrl 배터리 " + battery + "%", Toast.LENGTH_SHORT).show();
-                            });
-
-                            BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                            BluetoothGattCharacteristic writeChar = service.getCharacteristic(WRITE_UUID);
-                            writeChar.setValue(new byte[]{0x01,0x00});
-                            boolean success = gatt.writeCharacteristic(writeChar);
-                            Log.d(TAG, "write - " + success);
-                        } else {
-                            Log.d(TAG, "onCharacteristicRead - " + status);
-                        }
-                    }
-
-                    @Override
-                    public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                        Log.d(TAG, "onCharacteristicWrite");
-                        gatt.executeReliableWrite();
-
-                        BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                        BluetoothGattCharacteristic notifyChar = service.getCharacteristic(NOTIFY_UUID);
-                        BluetoothGattDescriptor desc = notifyChar.getDescriptor(NOTIFY_ENABLE_UUID);
-                        desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        gatt.writeDescriptor(desc);
-                        boolean r = gatt.setCharacteristicNotification(notifyChar, true);
-                        Log.d(TAG, "setCharacteristicNotification " + r);
-                    }
-
-                    @Override
-                    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                        vrCtrl.receiveData(characteristic.getValue());
-                    }
-                });
-            }
-        }
-    }
-
     @Override
     public void onVolumeUp() {
 
@@ -261,6 +188,7 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
 
     @Override
     public void onPadPress(int x, int y) {
+        Log.d(TAG, "onPadPress : "+ x +", " + y);
         int offsetY = mWebView.getScrollY();
         if (y > 150) {
             mWebView.scrollTo(0, offsetY +500);
