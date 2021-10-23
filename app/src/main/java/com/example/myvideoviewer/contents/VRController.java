@@ -92,13 +92,31 @@ public class VRController {
 
             @Override
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                Log.d(TAG, "onServicesDiscovered");
-                BluetoothGattService batteryService = gatt.getService(Battery_Service_UUID);
-                BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
-                BluetoothGattDescriptor batterDesc = batteryLevel.getDescriptor(NOTIFY_ENABLE_UUID);
-                batterDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                boolean batterySuccess = gatt.readCharacteristic(batteryLevel);
-                Log.d(TAG, "battery read - " + batterySuccess);
+                context.runOnUiThread(()-> {
+                    BluetoothGattService service = gatt.getService(SERVICE_UUID);
+                    BluetoothGattCharacteristic writeChar = service.getCharacteristic(WRITE_UUID);
+                    BluetoothGattCharacteristic notifyChar = service.getCharacteristic(NOTIFY_UUID);
+                    BluetoothGattDescriptor desc = notifyChar.getDescriptor(NOTIFY_ENABLE_UUID);
+                    desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    gatt.writeDescriptor(desc);
+                    boolean r = gatt.setCharacteristicNotification(notifyChar, true);
+                    Log.d(TAG, "setCharacteristicNotification " + r);
+                    try{
+                        Thread.sleep(500);
+                        writeChar.setValue(new byte[]{0x01,0x00});
+                        gatt.writeCharacteristic(writeChar);
+                    } catch (Exception e) {}
+
+                    try{
+                        Thread.sleep(500);
+                        BluetoothGattService batteryService = gatt.getService(Battery_Service_UUID);
+                        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
+                        BluetoothGattDescriptor batterDesc = batteryLevel.getDescriptor(NOTIFY_ENABLE_UUID);
+                        batterDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                        boolean batterySuccess = gatt.readCharacteristic(batteryLevel);
+                        Log.d(TAG, "battery read - " + batterySuccess);
+                    } catch (Exception e) {}
+                });
             }
 
             @Override
@@ -109,12 +127,6 @@ public class VRController {
                     context.runOnUiThread(()-> {
                         Toast.makeText(context, "VR Ctrl 배터리 " + battery + "%", Toast.LENGTH_SHORT).show();
                     });
-
-                    BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                    BluetoothGattCharacteristic writeChar = service.getCharacteristic(WRITE_UUID);
-                    writeChar.setValue(new byte[]{0x01,0x00});
-                    boolean success = gatt.writeCharacteristic(writeChar);
-                    Log.d(TAG, "write - " + success);
                 } else {
                     Log.d(TAG, "onCharacteristicRead - " + status);
                 }
@@ -124,18 +136,10 @@ public class VRController {
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 Log.d(TAG, "onCharacteristicWrite");
                 gatt.executeReliableWrite();
-                BluetoothGattService service = gatt.getService(SERVICE_UUID);
-                BluetoothGattCharacteristic notifyChar = service.getCharacteristic(NOTIFY_UUID);
-                BluetoothGattDescriptor desc = notifyChar.getDescriptor(NOTIFY_ENABLE_UUID);
-                desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                gatt.setCharacteristicNotification(notifyChar, true);
-                gatt.writeDescriptor(desc);
-                Log.d(TAG, "setCharacteristicNotification");
             }
 
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                Log.d(TAG ,"onCharacteristicChanged");
                 receiveData(characteristic.getValue());
             }
         });
