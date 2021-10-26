@@ -9,6 +9,5 @@
     <item android:id="@+id/favorite"
         android:title="favorite"
         android:icon="@drawable/ic_favorite"
-        app:actionViewClass="android.widget.Spinner"
         app:showAsAction="always"/>
 </menu>
