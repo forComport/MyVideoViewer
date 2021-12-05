@@ -1,5 +1,6 @@
 package com.example.myvideoviewer;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -12,11 +13,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.SearchView;
 
 import com.example.myvideoviewer.contents.VRController;
+
+import java.io.IOException;
 
 public class WebViewActivity extends AppCompatActivity implements VRController.Listener {
 
@@ -32,6 +38,19 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mWebView.loadUrl(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -55,7 +74,26 @@ public class WebViewActivity extends AppCompatActivity implements VRController.L
 
         mWebView = findViewById(R.id.webView);
         mWebView.setWebChromeClient(new WebChromeClient());
-        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Log.d(TAG, request.getUrl().toString());
+                return super.shouldOverrideUrlLoading(view, request);
+            }
+
+            @Nullable
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                if (url.endsWith(".gif") || url.startsWith("https://1.bp.blogspot.com/")) {
+                    Log.d(TAG, url);
+                    try {
+                        return new WebResourceResponse("", "", getAssets().open("blank.png"));
+                    } catch (IOException e) {}
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+        });
         mWebView.setWebContentsDebuggingEnabled(true);
         WebSettings settings = mWebView.getSettings();
         settings.setJavaScriptEnabled(true);
