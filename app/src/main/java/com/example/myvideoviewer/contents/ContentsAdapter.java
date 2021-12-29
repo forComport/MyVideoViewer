@@ -1,6 +1,7 @@
 package com.example.myvideoviewer.contents;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.myvideoviewer.R;
 
+import java.io.File;
 import java.util.ArrayList;
 
 class ContentsAdapter extends BaseAdapter {
@@ -56,9 +58,16 @@ class ContentsAdapter extends BaseAdapter {
         ContentsItem item = getItem(position);
         ((TextView) convertView.findViewById(R.id.title)).setText(item.title);
         ((TextView) convertView.findViewById(R.id.meta)).setText(item.meta);
-        Glide.with(convertView)
-                .load(item.thumbnail)
-                .into((ImageView) convertView.findViewById(R.id.thumbnail));
+        if ("file".equals(item.thumbnail)) {
+            File file = new File(Uri.parse(item.pageUrl).getPath());
+            Glide.with(convertView)
+                    .load(file)
+                    .into((ImageView) convertView.findViewById(R.id.thumbnail));
+        } else {
+            Glide.with(convertView)
+                    .load(item.thumbnail)
+                    .into((ImageView) convertView.findViewById(R.id.thumbnail));
+        }
         convertView.setOnClickListener((v)->{
             if (LinkListener != null) {
                 LinkListener.onClick(item);

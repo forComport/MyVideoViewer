@@ -35,21 +35,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".contents.ListActivity" />
-
-        <service
-            android:name=".jav247.ZombiService"
-            android:enabled="true"
-            android:exported="true" />
-
-        <receiver android:name=".jav247.DownloadReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
-            </intent-filter>
-        </receiver>
-
-        <activity
-            android:name=".jav247.Jav247ListActivity"
-            android:screenOrientation="portrait" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -20,6 +21,7 @@ import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -49,6 +51,8 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     private MediaController mediaCtrl;
     private VRController vrCtrl;
     private ArrayList<ContentsItem> RelativeVideos = new ArrayList<>();
+    private String mUrl;
+    private ContentsItem mItem;
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -72,6 +76,10 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             }
             videoView.start();
             findViewById(R.id.progressBar).setVisibility(View.GONE);
+
+            v.setOnSeekCompleteListener((mp)->{
+                Log.d(TAG, "setOnSeekCompleteListener");
+            });
         });
 
         Intent intent = getIntent();
@@ -88,6 +96,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             item = (ContentsItem) intent.getParcelableExtra("item");
             loader = ContentsLoader.Provider.get(provider).setContext(this);
         }
+        mItem = item;
         loader.setOnDetailListener(this);
         loader.loadDetail(item);
 
@@ -166,6 +175,26 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             AlertDialog dialog = builder.create();
             dialog.show();
         });
+
+        findViewById(R.id.btn_download).setOnClickListener((v)->{
+            if (mUrl != null) {
+                DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                if (mUrl.startsWith("file://")) {
+                    downloadManager.remove(mItem.id);
+                    Toast.makeText(getApplicationContext(), "삭제완료", Toast.LENGTH_LONG).show();
+                } else {
+                    Uri uri = Uri.parse(mUrl);
+                    DownloadManager.Request request = new DownloadManager.Request(uri);
+                    request.setTitle(mItem.title);
+                    request.setDescription("다운로드중...");
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                    request.setDestinationInExternalFilesDir(DetailActivity.this, Environment.DIRECTORY_DOWNLOADS,
+                            uri.getLastPathSegment());
+                    downloadManager.enqueue(request);
+                    Toast.makeText(getApplicationContext(), "다운로드 시작", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -185,6 +214,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     @Override
     public void onVideoLoad(String url) {
         Log.d(TAG, url);
+        mUrl = url;
         videoView.setVideoURI(Uri.parse(url));
         videoView.requestFocus();
     }
@@ -207,9 +237,9 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     public void onPadPress(int x, int y) {
         int p = videoView.getCurrentPosition();
         if (x > 180) {
-            videoView.seekTo(p + 20000);
+            videoView.seekTo(p + 3000);
         } else {
-            videoView.seekTo(p - 20000);
+            videoView.seekTo(p - 3000);
         }
     }
 

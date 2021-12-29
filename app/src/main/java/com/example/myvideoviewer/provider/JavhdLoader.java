@@ -86,12 +86,19 @@ public class JavhdLoader extends ContentsLoader {
             String link = elements.get(0).attr("href");
             String number = link.split("p=")[1];
             String token = doc.select("#video-player").get(0).attr("mpu-data");
+            Log.d(TAG, token + ", " + number);
             String page = parseToken(token, number, "_0x596811");
-
+            Log.d(TAG, page);
             StringRequest stringRequest2 = new StringRequest(Request.Method.GET, "https:"+page, (res2)->{
                 String token2 = res2.split("f8_0x5add\\('")[1].split("',")[0];
                 Document doc2 = Jsoup.parse(res2);
-                String number2 = doc2.select("meta").get(2).attr("content");
+                String number2 = "";
+                for(int i=0;i<doc2.select("meta").size();i++) {
+                    if (doc2.select("meta").get(i).attr("name").equals("file_id")) {
+                        number2 = doc2.select("meta").get(i).attr("content");
+                    }
+                }
+                Log.d(TAG, token2 + ", " + number2);
                 String page2 = parseToken(token2, number2, "_0x583715");
                 Log.d(TAG, page2);
                 String vid = page2.split("/")[page2.split("/").length-1];

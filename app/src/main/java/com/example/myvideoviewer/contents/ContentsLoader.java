@@ -5,6 +5,7 @@ import android.content.Context;
 import com.example.myvideoviewer.provider.HanimeLoader;
 import com.example.myvideoviewer.provider.Jav247Loader;
 import com.example.myvideoviewer.provider.JavhdLoader;
+import com.example.myvideoviewer.provider.LibraryLoader;
 import com.example.myvideoviewer.provider.XVideoLoader;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public abstract class ContentsLoader {
         put(Jav247Loader.KEY, new Jav247Loader());
         put(HanimeLoader.KEY, new HanimeLoader());
         put(JavhdLoader.KEY, new JavhdLoader());
+        put(LibraryLoader.KEY, new LibraryLoader());
     }};
     public interface ListListener {
         void onListLoad(ArrayList<ContentsItem> items);

@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import org.jsoup.nodes.Element;
 
 public class ContentsItem implements Parcelable {
+    public int id = 0;
     public String thumbnail;
     public String pageUrl;
     public String title;
@@ -19,6 +20,7 @@ public class ContentsItem implements Parcelable {
     }
 
     ContentsItem(Parcel in) {
+        this.id = in.readInt();
         this.thumbnail = in.readString();
         this.pageUrl = in.readString();
         this.title = in.readString();
@@ -32,6 +34,7 @@ public class ContentsItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(thumbnail);
         dest.writeString(pageUrl);
         dest.writeString(title);
