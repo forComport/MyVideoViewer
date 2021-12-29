@@ -52,7 +52,7 @@ public class HanimeLoader extends ContentsLoader {
                     JSONObject item = arr.getJSONObject(i);
                     String thumbnail = item.getString("poster_url");
                     String title = item.getString("name");
-                    String pageUrl = "https://hw.hanime.tv/api/v8/video?id=" + item.getString("slug");
+                    String pageUrl = "https://hanime.tv/api/v8/video?id=" + item.getString("slug");
                     String meta = item.getString("tags");
                     ContentsItem content = new ContentsItem(thumbnail, pageUrl, title, meta);
                     contents.add(content);
