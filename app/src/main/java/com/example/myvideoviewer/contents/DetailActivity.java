@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -53,6 +54,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     private ArrayList<ContentsItem> RelativeVideos = new ArrayList<>();
     private String mUrl;
     private ContentsItem mItem;
+    private MediaPlayer mMediaPlayer;
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -76,10 +78,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             }
             videoView.start();
             findViewById(R.id.progressBar).setVisibility(View.GONE);
-
-            v.setOnSeekCompleteListener((mp)->{
-                Log.d(TAG, "setOnSeekCompleteListener");
-            });
+            mMediaPlayer = v;
         });
 
         Intent intent = getIntent();
@@ -235,11 +234,13 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
 
     @Override
     public void onPadPress(int x, int y) {
-        int p = videoView.getCurrentPosition();
+        int p = mMediaPlayer.getCurrentPosition();
         if (x > 180) {
-            videoView.seekTo(p + 3000);
+            mMediaPlayer.seekTo(p+3000, MediaPlayer.SEEK_CLOSEST);
+//            videoView.seekTo(p + 3000);
         } else {
-            videoView.seekTo(p - 3000);
+            mMediaPlayer.seekTo(p-3000, MediaPlayer.SEEK_PREVIOUS_SYNC);
+//            videoView.seekTo(p - 3000);
         }
     }
 

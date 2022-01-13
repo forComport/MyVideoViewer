@@ -90,40 +90,63 @@ public class JavhdLoader extends ContentsLoader {
             String page = parseToken(token, number, "_0x596811");
             Log.d(TAG, page);
             StringRequest stringRequest2 = new StringRequest(Request.Method.GET, "https:"+page, (res2)->{
-                String token2 = res2.split("f8_0x5add\\('")[1].split("',")[0];
-                Document doc2 = Jsoup.parse(res2);
-                String number2 = "";
-                for(int i=0;i<doc2.select("meta").size();i++) {
-                    if (doc2.select("meta").get(i).attr("name").equals("file_id")) {
-                        number2 = doc2.select("meta").get(i).attr("content");
-                    }
-                }
-                Log.d(TAG, token2 + ", " + number2);
-                String page2 = parseToken(token2, number2, "_0x583715");
-                Log.d(TAG, page2);
-                String vid = page2.split("/")[page2.split("/").length-1];
-                StringRequest stringRequest3 = new StringRequest(Request.Method.POST, "https://mm9844.com/api/source/"+vid, (res3)->{
-                    try {
-                        JSONObject obj = new JSONObject(res3);
-                        JSONArray data = obj.getJSONArray("data");
-                        for(int i=0;i<data.length();i++) {
-                            JSONObject jitem = data.getJSONObject(i);
-                            String redirection_url = jitem.getString("file");
-                            getRealUrl(redirection_url);
-                            break;
+                String[] block = res2.split("f8_0x5add\\('");
+                if (block.length > 1) {
+                    String token2 = block[1].split("',")[0];
+                    Document doc2 = Jsoup.parse(res2);
+                    String number2 = "";
+                    for(int i=0;i<doc2.select("meta").size();i++) {
+                        if (doc2.select("meta").get(i).attr("name").equals("file_id")) {
+                            number2 = doc2.select("meta").get(i).attr("content");
                         }
-                    } catch (Exception e) {
-                        Log.d(TAG, e.toString());
                     }
-                },(err)->{
-                    Log.d(TAG, err.toString());
-                });
-                queue.add(stringRequest3);
+                    Log.d(TAG, token2 + ", " + number2);
+                    String page2 = parseToken(token2, number2, "_0x583715");
+                    Log.d(TAG, page2);
+                    String vid = page2.split("/")[page2.split("/").length-1];
+                    StringRequest stringRequest3 = new StringRequest(Request.Method.POST, "https://mm9844.com/api/source/"+vid, (res3)->{
+                        Log.d(TAG, res3);
+                        try {
+                            JSONObject obj = new JSONObject(res3);
+                            Object data = obj.get("data");
+                            if (data instanceof String) {
+                                String dataString = data.toString();
+                                String url = dataString.split("href=\"")[1].split("\"")[0];
+                                StringRequest stringRequest4 = new StringRequest(Request.Method.GET, url, (res4)->{
+                                    Log.d(TAG, "here");
+                                }, err->{
+                                    Log.d(TAG, err.toString());
+                                });
+                                queue.add(stringRequest4);
+                                Log.d(TAG, url);
+                            } else {
+                                JSONArray dataArray = obj.getJSONArray("data");
+                                for(int i=0;i<dataArray.length();i++) {
+                                    JSONObject jitem = dataArray.getJSONObject(i);
+                                    String redirection_url = jitem.getString("file");
+                                    getRealUrl(redirection_url);
+                                    break;
+                                }
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
+                            Log.d(TAG, e.toString());
+                        }
+                    },(err)->{
+                        Toast.makeText(context, err.toString(), Toast.LENGTH_LONG).show();
+                        Log.d(TAG, err.toString());
+                    });
+                    queue.add(stringRequest3);
+                } else {
+                    Log.d(TAG, res2);
+                    Toast.makeText(context, res2, Toast.LENGTH_LONG).show();
+                }
+
             },(err)->{
+                Toast.makeText(context, err.toString(), Toast.LENGTH_LONG).show();
                 Log.d(TAG, err.toString());
             });
             queue.add(stringRequest2);
-
         }, (err)-> {
         });
         queue.add(stringRequest);
