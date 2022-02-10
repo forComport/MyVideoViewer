@@ -103,4 +103,7 @@ public class XVideoLoader extends ContentsLoader {
         });
         queue.add(stringRequest);
     }
+
+    @Override
+    public void onLongClick(ContentsItem item) {}
 }

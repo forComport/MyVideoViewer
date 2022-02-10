@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Map;
 
 public class JavhdLoader extends ContentsLoader {
 
@@ -104,7 +105,8 @@ public class JavhdLoader extends ContentsLoader {
                     String page2 = parseToken(token2, number2, "_0x583715");
                     Log.d(TAG, page2);
                     String vid = page2.split("/")[page2.split("/").length-1];
-                    StringRequest stringRequest3 = new StringRequest(Request.Method.POST, "https://mm9844.com/api/source/"+vid, (res3)->{
+                    String host = page2.split("/v/")[0];
+                    StringRequest stringRequest3 = new StringRequest(Request.Method.POST, host + "/api/source/"+vid, (res3)->{
                         Log.d(TAG, res3);
                         try {
                             JSONObject obj = new JSONObject(res3);
@@ -112,10 +114,25 @@ public class JavhdLoader extends ContentsLoader {
                             if (data instanceof String) {
                                 String dataString = data.toString();
                                 String url = dataString.split("href=\"")[1].split("\"")[0];
-                                StringRequest stringRequest4 = new StringRequest(Request.Method.GET, url, (res4)->{
-                                    Log.d(TAG, "here");
+                                String id = url.split("/v/")[1].split("/")[0];
+                                StringRequest stringRequest4 = new StringRequest(Request.Method.POST, "https://diasfem.com/api/source/"+id, (res4)->{
+                                    Log.d(TAG, res4);
+                                    try {
+                                        JSONObject obj4 = new JSONObject(res4);
+                                        JSONArray dataArray = obj4.getJSONArray("data");
+                                        for(int i=0;i<dataArray.length();i++) {
+                                            JSONObject jitem = dataArray.getJSONObject(i);
+                                            String redirection_url = jitem.getString("file");
+                                            getRealUrl(redirection_url);
+                                            break;
+                                        }
+                                    } catch (Exception e) {
+                                        Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
+                                        Log.d(TAG, e.toString());
+                                    }
                                 }, err->{
-                                    Log.d(TAG, err.toString());
+                                    Log.d(TAG, "https://diasfem.com/api/source/"+id);
+                                    Log.d(TAG, "3:"+err.toString());
                                 });
                                 queue.add(stringRequest4);
                                 Log.d(TAG, url);
@@ -134,17 +151,18 @@ public class JavhdLoader extends ContentsLoader {
                         }
                     },(err)->{
                         Toast.makeText(context, err.toString(), Toast.LENGTH_LONG).show();
-                        Log.d(TAG, err.toString());
+                        Log.d(TAG, "2:"+err.toString());
                     });
                     queue.add(stringRequest3);
                 } else {
                     Log.d(TAG, res2);
+                    Log.d(TAG, "https:"+page);
                     Toast.makeText(context, res2, Toast.LENGTH_LONG).show();
                 }
 
             },(err)->{
                 Toast.makeText(context, err.toString(), Toast.LENGTH_LONG).show();
-                Log.d(TAG, err.toString());
+                Log.d(TAG, "1:"+err.toString());
             });
             queue.add(stringRequest2);
         }, (err)-> {
@@ -164,9 +182,9 @@ public class JavhdLoader extends ContentsLoader {
 
                     Log.d(TAG, "status - " + status);
                     Log.d(TAG, "url - " + conn.getURL().toString());
-                    for(String key : conn.getHeaderFields().keySet()) {
-                        Log.d(TAG, "key - " + key + " : " + conn.getHeaderField(key));
-                    }
+//                    for(String key : conn.getHeaderFields().keySet()) {
+//                        Log.d(TAG, "key - " + key + " : " + conn.getHeaderField(key));
+//                    }
                     conn.disconnect();
                     if (status == 200) {
                         return conn.getURL().toString();
@@ -227,4 +245,7 @@ public class JavhdLoader extends ContentsLoader {
     private String fromCharCode(int codePoints) {
         return (char)codePoints + "";
     }
+
+    @Override
+    public void onLongClick(ContentsItem item) {}
 }

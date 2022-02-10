@@ -55,4 +55,6 @@ public abstract class ContentsLoader {
     public abstract void loadList();
 
     public abstract void loadDetail(ContentsItem item);
+
+    public abstract void onLongClick(ContentsItem item);
 }

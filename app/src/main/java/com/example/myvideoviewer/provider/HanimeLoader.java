@@ -133,4 +133,8 @@ public class HanimeLoader extends ContentsLoader {
         });
         queue.add(stringRequest);
     }
+
+    @Override
+    public void onLongClick(ContentsItem item) {}
+
 }

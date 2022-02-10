@@ -155,4 +155,7 @@ public class Jav247Loader extends ContentsLoader {
         });
         queue.add(stringRequest);
     }
+
+    @Override
+    public void onLongClick(ContentsItem item) {}
 }

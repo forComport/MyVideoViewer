@@ -3,8 +3,11 @@ package com.example.myvideoviewer.contents;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DownloadManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.example.myvideoviewer.R;
 
@@ -95,6 +99,36 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
     }
 
     @Override
+    public void onLongClick(ContentsItem item) {
+        loader.setOnDetailListener(new ContentsLoader.DetailListener() {
+            @Override
+            public void onVideoLoad(String url) {
+                DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                if (url == null || url.startsWith("file://")) {
+                    downloadManager.remove(item.id);
+                    Toast.makeText(getApplicationContext(), "삭제완료", Toast.LENGTH_LONG).show();
+                } else {
+                    Uri uri = Uri.parse(url);
+                    DownloadManager.Request request = new DownloadManager.Request(uri);
+                    request.setTitle(item.title);
+                    request.setDescription("다운로드중...");
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                    request.setDestinationInExternalFilesDir(ListActivity.this, Environment.DIRECTORY_DOWNLOADS,
+                            uri.getLastPathSegment());
+                    downloadManager.enqueue(request);
+                    Toast.makeText(getApplicationContext(), "다운로드 시작", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onRelativeListLoad(ArrayList<ContentsItem> items) {
+
+            }
+        });
+        loader.loadDetail(item);
+    }
+
+    @Override
     public void onListLoad(ArrayList<ContentsItem> items) {
         for(ContentsItem item : items) {
             adapter.add(item);
@@ -102,4 +136,6 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
         adapter.notifyDataSetChanged();
         findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
     }
+
+
 }

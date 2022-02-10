@@ -58,4 +58,7 @@ public class YoutubeLoader extends ContentsLoader {
             Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
         }
     }
+
+    @Override
+    public void onLongClick(ContentsItem item) {}
 }

@@ -58,7 +58,7 @@ class ContentsAdapter extends BaseAdapter {
         ContentsItem item = getItem(position);
         ((TextView) convertView.findViewById(R.id.title)).setText(item.title);
         ((TextView) convertView.findViewById(R.id.meta)).setText(item.meta);
-        if ("file".equals(item.thumbnail)) {
+        if ("file".equals(item.thumbnail) && item.pageUrl != null) {
             File file = new File(Uri.parse(item.pageUrl).getPath());
             Glide.with(convertView)
                     .load(file)
@@ -73,10 +73,19 @@ class ContentsAdapter extends BaseAdapter {
                 LinkListener.onClick(item);
             }
         });
+        convertView.setOnLongClickListener((v)->{
+            if (LinkListener != null) {
+                LinkListener.onLongClick(item);
+                return true;
+            } else {
+                return false;
+            }
+        });
         return convertView;
     }
 
     interface Listener {
         void onClick(ContentsItem item);
+        void onLongClick(ContentsItem item);
     }
 }

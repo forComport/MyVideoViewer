@@ -61,4 +61,9 @@ public class LibraryLoader extends ContentsLoader {
     public void loadDetail(ContentsItem item) {
         detailListener.onVideoLoad(item.pageUrl);
     }
+
+    @Override
+    public void onLongClick(ContentsItem item) {
+
+    }
 }
