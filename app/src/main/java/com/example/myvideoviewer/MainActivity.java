@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 
 import com.example.myvideoviewer.contents.ContentsLoader;
 import com.example.myvideoviewer.contents.ListActivity;
+import com.example.myvideoviewer.vr.VRActivity;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +37,15 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
         group.addView(button);
+
+        Button button2 = new Button(this);
+        button2.setText("VR");
+        button2.setOnClickListener((v)-> {
+            Intent intent = new Intent(getApplicationContext(), VRActivity.class);
+            startActivity(intent);
+        });
+        group.addView(button2);
+
     }
 
 }

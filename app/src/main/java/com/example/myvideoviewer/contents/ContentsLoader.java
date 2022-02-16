@@ -3,6 +3,7 @@ package com.example.myvideoviewer.contents;
 import android.content.Context;
 
 import com.example.myvideoviewer.provider.HanimeLoader;
+import com.example.myvideoviewer.provider.HentaizLoader;
 import com.example.myvideoviewer.provider.Jav247Loader;
 import com.example.myvideoviewer.provider.JavhdLoader;
 import com.example.myvideoviewer.provider.LibraryLoader;
@@ -22,6 +23,7 @@ public abstract class ContentsLoader {
         put(XVideoLoader.KEY,new XVideoLoader());
         put(Jav247Loader.KEY, new Jav247Loader());
         put(HanimeLoader.KEY, new HanimeLoader());
+        put(HentaizLoader.KEY, new HentaizLoader());
         put(JavhdLoader.KEY, new JavhdLoader());
         put(LibraryLoader.KEY, new LibraryLoader());
     }};

@@ -21,7 +21,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyService"
         android:usesCleartextTraffic="true">
-        <activity android:name=".WebViewActivity"></activity>
+        <activity
+            android:name=".vr.VRActivity"
+            android:exported="true" />
+        <activity android:name=".WebViewActivity" />
         <activity
             android:name=".contents.DetailActivity"
             android:screenOrientation="landscape"
