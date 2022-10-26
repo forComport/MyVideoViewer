@@ -3,10 +3,10 @@ package com.example.myvideoviewer.contents;
 import android.content.Context;
 
 import com.example.myvideoviewer.provider.HanimeLoader;
-import com.example.myvideoviewer.provider.HentaizLoader;
 import com.example.myvideoviewer.provider.Jav247Loader;
 import com.example.myvideoviewer.provider.JavhdLoader;
 import com.example.myvideoviewer.provider.LibraryLoader;
+import com.example.myvideoviewer.provider.MissavLoader;
 import com.example.myvideoviewer.provider.XVideoLoader;
 
 import java.util.ArrayList;
@@ -22,8 +22,8 @@ public abstract class ContentsLoader {
     public static Map<String, ContentsLoader> Provider = new HashMap<String, ContentsLoader>() {{
         put(XVideoLoader.KEY,new XVideoLoader());
         put(Jav247Loader.KEY, new Jav247Loader());
+        put(MissavLoader.KEY, new MissavLoader());
         put(HanimeLoader.KEY, new HanimeLoader());
-        put(HentaizLoader.KEY, new HentaizLoader());
         put(JavhdLoader.KEY, new JavhdLoader());
         put(LibraryLoader.KEY, new LibraryLoader());
     }};
@@ -31,7 +31,7 @@ public abstract class ContentsLoader {
         void onListLoad(ArrayList<ContentsItem> items);
     }
     public interface DetailListener {
-        void onVideoLoad(String url);
+        void onVideoLoad(String url, Map<String, String> headers);
         void onRelativeListLoad(ArrayList<ContentsItem> items);
     }
 

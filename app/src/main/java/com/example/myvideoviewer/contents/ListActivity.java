@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.myvideoviewer.R;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ListActivity extends AppCompatActivity implements AbsListView.OnScrollListener,
         ContentsAdapter.Listener, ContentsLoader.ListListener {
@@ -102,7 +103,7 @@ public class ListActivity extends AppCompatActivity implements AbsListView.OnScr
     public void onLongClick(ContentsItem item) {
         loader.setOnDetailListener(new ContentsLoader.DetailListener() {
             @Override
-            public void onVideoLoad(String url) {
+            public void onVideoLoad(String url, Map<String, String> headers) {
                 DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                 if (url == null || url.startsWith("file://")) {
                     downloadManager.remove(item.id);

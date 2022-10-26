@@ -94,7 +94,7 @@ public class XVideoLoader extends ContentsLoader {
                 Log.d(TAG, e.toString());
             }
             if (detailListener != null) {
-                detailListener.onVideoLoad(video);
+                detailListener.onVideoLoad(video, null);
                 detailListener.onRelativeListLoad(arr);
             }
         }, (err)-> {

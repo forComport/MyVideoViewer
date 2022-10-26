@@ -5,15 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,23 +18,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.example.myvideoviewer.R;
-import com.example.myvideoviewer.provider.YoutubeLoader;
 
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DetailActivity extends AppCompatActivity implements ContentsLoader.DetailListener, VRController.Listener {
     private static final String TAG = "DetailActivityTAG";
@@ -86,18 +75,13 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         ContentsItem item;
         ContentsLoader loader;
         if (provider == null) {
-            String url = intent.getStringExtra(Intent.EXTRA_TEXT);
-            YoutubeLoader youtubeLoader = new YoutubeLoader();
-            loader = youtubeLoader.setContext(this);
-            loader.init();
-            item = youtubeLoader.makeItem(url);
         } else {
             item = (ContentsItem) intent.getParcelableExtra("item");
             loader = ContentsLoader.Provider.get(provider).setContext(this);
+            mItem = item;
+            loader.setOnDetailListener(this);
+            loader.loadDetail(item);
         }
-        mItem = item;
-        loader.setOnDetailListener(this);
-        loader.loadDetail(item);
 
         vrCtrl = new VRController(this);
         vrCtrl.setListener(this);
@@ -211,10 +195,10 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     }
 
     @Override
-    public void onVideoLoad(String url) {
+    public void onVideoLoad(String url, Map<String, String> headers) {
         Log.d(TAG, url);
         mUrl = url;
-        videoView.setVideoURI(Uri.parse(url));
+        videoView.setVideoURI(Uri.parse(url), headers);
         videoView.requestFocus();
     }
 

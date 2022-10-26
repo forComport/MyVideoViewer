@@ -136,7 +136,7 @@ public class Jav247Loader extends ContentsLoader {
                             @Override
                             protected void onPostExecute(String url) {
                                 if (url != null) {
-                                    detailListener.onVideoLoad(url);
+                                    detailListener.onVideoLoad(url, null);
                                 } else {
                                     Toast.makeText(context, "링크 획득 실패", Toast.LENGTH_SHORT).show();
                                 }

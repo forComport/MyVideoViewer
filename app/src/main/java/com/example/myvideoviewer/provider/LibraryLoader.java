@@ -59,7 +59,7 @@ public class LibraryLoader extends ContentsLoader {
 
     @Override
     public void loadDetail(ContentsItem item) {
-        detailListener.onVideoLoad(item.pageUrl);
+        detailListener.onVideoLoad(item.pageUrl, null);
     }
 
     @Override

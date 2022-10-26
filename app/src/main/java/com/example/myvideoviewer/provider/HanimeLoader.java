@@ -121,7 +121,7 @@ public class HanimeLoader extends ContentsLoader {
                     contents.add(content);
                 }
                 if (detailListener != null) {
-                    detailListener.onVideoLoad(videoUrl);
+                    detailListener.onVideoLoad(videoUrl, null);
                     detailListener.onRelativeListLoad(contents);
                 }
             }catch (Exception e) {
