@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -29,6 +30,19 @@ import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.example.myvideoviewer.R;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,38 +51,38 @@ import java.util.Map;
 public class DetailActivity extends AppCompatActivity implements ContentsLoader.DetailListener, VRController.Listener {
     private static final String TAG = "DetailActivityTAG";
 
-    private VideoView videoView;
-    private MediaController mediaCtrl;
+    private PlayerView videoView;
+//    private MediaController mediaCtrl;
     private VRController vrCtrl;
     private ArrayList<ContentsItem> RelativeVideos = new ArrayList<>();
     private String mUrl;
     private ContentsItem mItem;
     private MediaPlayer mMediaPlayer;
+    private SimpleExoPlayer player;
 
     @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
 //        View decorView = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 //                | View.SYSTEM_UI_FLAG_FULLSCREEN;
 //        decorView.setSystemUiVisibility(uiOptions);
         getWindow().setNavigationBarColor(R.color.black);
         videoView = findViewById(R.id.video);
-        mediaCtrl = new MediaController(this);
-        videoView.setMediaController(mediaCtrl);
-        videoView.setOnPreparedListener((v)->{
-            int width = videoView.getMeasuredWidth();
-            int height = videoView.getMeasuredHeight();
-            if (height > width) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }
-            videoView.start();
-            findViewById(R.id.progressBar).setVisibility(View.GONE);
-            mMediaPlayer = v;
-        });
+//        mediaCtrl = new MediaController(this);
+//        videoView.setMediaController(mediaCtrl);
+//        videoView.setOnPreparedListener((v)->{
+//            int width = videoView.getMeasuredWidth();
+//            int height = videoView.getMeasuredHeight();
+//            if (height > width) {
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//            }
+//            videoView.start();
+//            findViewById(R.id.progressBar).setVisibility(View.GONE);
+//            mMediaPlayer = v;
+//        });
 
         Intent intent = getIntent();
         String provider = intent.getStringExtra("provider");
@@ -87,6 +101,54 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
         vrCtrl.setListener(this);
 
         registerButton();
+    }
+
+    Map<String, String> headers;
+
+    private void initializePlayer(String url, Map<String, String> headers) {
+        if (player == null) {
+            player = new SimpleExoPlayer.Builder(this).build();
+            videoView.setPlayer(player);
+        }
+//        String sample = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+        this.headers = headers;
+        MediaSource mediaSource = buildMediaSource(Uri.parse(url), headers);
+        player.setMediaSource(mediaSource);
+        player.prepare();
+        player.setPlayWhenReady(true);
+        findViewById(R.id.progressBar).setVisibility(View.GONE);
+    }
+
+//    static class MyHttpDataSource extends DefaultHttpDataSource {
+//        @Override
+//        public long open(DataSpec dataSpec) throws HttpDataSourceException {
+////            setRequestProperty("referer", "https://missav.com/ko/dse-1305");
+////            setRequestProperty("origin", "https://missav.com");
+//            Log.d(TAG, "set header");
+//            return super.open(dataSpec);
+//        }
+//    }
+
+    private MediaSource buildMediaSource(Uri uri, Map<String, String> headers) {
+
+        String userAgent = Util.getUserAgent(this, "blackJin");
+
+        if (uri.getLastPathSegment().contains("mp3") || uri.getLastPathSegment().contains("mp4")) {
+
+            return new ProgressiveMediaSource.Factory(new DefaultHttpDataSource.Factory())
+                    .createMediaSource(uri);
+
+        } else if (uri.getLastPathSegment().contains("m3u8")) {
+            //com.google.android.exoplayer:exoplayer-hls 확장 라이브러리를 빌드 해야 합니다.
+            return new HlsMediaSource.Factory(new DefaultHttpDataSource.Factory().setDefaultRequestProperties(headers))
+                    .createMediaSource(MediaItem.fromUri(uri));
+
+        } else {
+
+            return new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(this, userAgent))
+                    .createMediaSource(uri);
+        }
+
     }
 
     private void registerButton() {
@@ -181,16 +243,24 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        if (videoView != null) {
-            videoView.pause();
+        if(player != null) {
+            player.pause();
         }
     }
 
     @Override
     protected void onDestroy() {
-        videoView.stopPlayback();
+        if(player != null) {
+            player.release();
+            player = null;
+        }
         super.onDestroy();
     }
 
@@ -198,8 +268,9 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
     public void onVideoLoad(String url, Map<String, String> headers) {
         Log.d(TAG, url);
         mUrl = url;
-        videoView.setVideoURI(Uri.parse(url), headers);
-        videoView.requestFocus();
+//        videoView.setVideoURI(Uri.parse(url), headers);
+//        videoView.requestFocus();
+        initializePlayer(url, headers);
     }
 
     @Override
@@ -218,14 +289,16 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
 
     @Override
     public void onPadPress(int x, int y) {
-        int p = mMediaPlayer.getCurrentPosition();
-        if (x > 180) {
-            mMediaPlayer.seekTo(p+3000, MediaPlayer.SEEK_CLOSEST);
-//            videoView.seekTo(p + 3000);
-        } else {
-            mMediaPlayer.seekTo(p-3000, MediaPlayer.SEEK_PREVIOUS_SYNC);
-//            videoView.seekTo(p - 3000);
-        }
+        runOnUiThread(()->{
+            long p = player.getCurrentPosition();
+            if (x > 180) {
+                player.seekTo(p + 3000);
+//            player.play();
+            } else {
+                player.seekTo(p - 3000);
+//            player.play();
+            }
+        });
     }
 
     @Override
@@ -240,26 +313,24 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
 
     @Override
     public void onHomePress() {
-        if(videoView.isPlaying()) {
-            videoView.pause();
-        } else {
-            videoView.start();
-        }
+        runOnUiThread(()->{
+            if (player != null) {
+                if(player.isPlaying()) {
+                    player.pause();
+                } else {
+                    player.play();
+                }
+            }
+        });
     }
 
     @Override
     public void onTrigger() {
         runOnUiThread(()->{
-            if (mediaCtrl != null) {
-                try {
-                    if(mediaCtrl.isShowing()) {
-                        mediaCtrl.hide();
-                    } else {
-                        mediaCtrl.show(3000);
-                    }
-                } catch (Exception e) {
-
-                }
+            if (videoView.isControllerVisible()) {
+                videoView.hideController();
+            } else {
+                videoView.showController();
             }
         });
     }

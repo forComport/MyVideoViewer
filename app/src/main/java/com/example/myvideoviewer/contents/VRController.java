@@ -183,31 +183,37 @@ public class VRController {
         boolean volumeDownButton = (bytes[58] & (1 << 5)) > 0;
 
         if(!prevVolumeDownButton && volumeDownButton) {
+            prevVolumeDownButton = true;
             listener.onVolumeDown();
         }
         prevVolumeDownButton = volumeDownButton;
 
         if(!prevVolumeUpButton && volumeUpButton) {
+            prevVolumeUpButton = true;
             listener.onVolumeUp();
         }
         prevVolumeUpButton = volumeUpButton;
 
         if(!prevTouchPadButton && touchPadButton && touched) {
+            prevTouchPadButton = true;
             listener.onPadPress(axisX, axisY);
         }
         prevTouchPadButton = touchPadButton;
 
         if (!prevBackButton && backButton) {
+            prevBackButton = true;
             listener.onBackPress();
         }
         prevBackButton = backButton;
 
         if (!prevHomeButton && homeButton) {
+            prevHomeButton = true;
             listener.onHomePress();
         }
         prevHomeButton = homeButton;
 
         if (!prevTriggerButton && triggerButton) {
+            prevTriggerButton = true;
             listener.onTrigger();
         }
         prevTriggerButton = triggerButton;
