@@ -261,6 +261,7 @@ public class DetailActivity extends AppCompatActivity implements ContentsLoader.
             player.release();
             player = null;
         }
+        vrCtrl.destroy();
         super.onDestroy();
     }
 

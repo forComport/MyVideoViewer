@@ -1,5 +1,6 @@
 package com.example.myvideoviewer.provider;
 
+import android.os.Handler;
 import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -14,6 +15,7 @@ import com.example.myvideoviewer.contents.ContentsItem;
 import com.example.myvideoviewer.contents.ContentsLoader;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,8 +41,7 @@ public class MissavLoader extends ContentsLoader {
     @Override
     public void search(String keyword) {
         page = 1;
-//        url = "https://www.xvideos.com/?k=" + keyword.replace(" ", "+");
-//        url2 = "https://www.xvideos.com/?k=" + keyword.replace(" ", "+") + "&p=";
+        url = "https://missav.com/ko/search/" +keyword +"?page=";
         loadList();
     }
 
@@ -81,14 +82,39 @@ public class MissavLoader extends ContentsLoader {
                 view.evaluateJavascript("(function(){return document.body.innerHTML;})()", (html)->{
                     String piece = html.split("eval")[1].split("const video")[0];
                     String evalScript = "eval"+piece.substring(0, piece.length()-16).replace("\\\\'", "\\'");
-                    view.evaluateJavascript("(function() { "+evalScript+"; return source480p; })();", (result)->{
+                    view.evaluateJavascript("(function() { "+evalScript+"; return source1280; })();", (result)->{
+                        if (result.equals("null")) {
+                            Toast.makeText(context, "video is null", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         String videoUrl = result.substring(1, result.length()-1);
                         Map<String, String> headers = new HashMap<>();
                         headers.put("origin", "https://missav.com");
                         headers.put("referer", item.pageUrl);
                         if (detailListener != null)
                             detailListener.onVideoLoad(videoUrl, headers);
+
                     });
+
+                });
+                view.evaluateJavascript("(function(){return Array.from(document.getElementsByClassName('thumbnail')).map(d=>({pageUrl:d.querySelector('a').href, thumbnail:d.querySelector('img').getAttribute('data-src'), title:d.querySelector('.text-secondary')?.text, meta:d.querySelector('span').innerText}));})()", (data)-> {
+                    try {
+                        JSONArray arr = new JSONArray(data);
+                        ArrayList<ContentsItem> output = new ArrayList<>();
+                        for(int i=0;i<arr.length();i++) {
+                            JSONObject item = arr.getJSONObject(i);
+                            ContentsItem contentItem = new ContentsItem(
+                                    item.getString("thumbnail").replace("\\/\\/", "//"),
+                                    item.getString("pageUrl"),
+                                    item.has("title") ? item.getString("title") : "no title",
+                                    item.getString("meta")
+                            );
+                            output.add(contentItem);
+                        }
+                        if (detailListener != null) detailListener.onRelativeListLoad(output);
+                    } catch (JSONException e) {
+                        Log.d(TAG, e.toString());
+                    }
                 });
             }
         });
